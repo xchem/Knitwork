@@ -1,9 +1,9 @@
-
 import mrich
 from typer import Typer
 from pathlib import Path
 
 app = Typer()
+
 
 @app.command()
 def fragment(
@@ -12,12 +12,15 @@ def fragment(
 ):
     mrich.h1("FRAGMENT")
     from .fragment import fragment
+
     fragment(input_sdf, output_dir)
+
 
 @app.command()
 def knit():
     mrich.h1("KNIT")
     raise NotImplementedError
+
 
 @app.command()
 def configure(
@@ -35,9 +38,10 @@ def configure(
         raise ValueError(f"'{var}' is not configurable")
 
     mrich.var(var, value)
-    
+
     CONFIG[var] = value
     dump_config(CONFIG)
+
 
 if __name__ == "__main__":
     app()

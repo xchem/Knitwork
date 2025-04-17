@@ -1,11 +1,11 @@
-
 import mrich
 from mrich import print
 from pathlib import Path
 from .config import CONFIG
 
+
 def fragment(
-    input_sdf: Path, 
+    input_sdf: Path,
     output_dir: Path | str = "fragment_output",
     overlap_cutoff: float = CONFIG["FRAGMENT_OVERLAP_CUTOFF"],
     distance_cutoff: float = CONFIG["FRAGMENT_DISTANCE_CUTOFF"],
@@ -22,8 +22,8 @@ def fragment(
     input_sdf = Path(input_sdf)
     output_dir = Path(output_dir)
 
-    mrich.var("input_sdf",input_sdf)
-    mrich.var("output_dir",output_dir)
+    mrich.var("input_sdf", input_sdf)
+    mrich.var("output_dir", output_dir)
 
     assert input_sdf.exists()
     if not output_dir.exists():
@@ -46,17 +46,21 @@ def fragment(
     mrich.var("#pairs", len(pair_df))
 
     # filter by overlap
-    pair_df["overlap"] = pair_df.apply(lambda x: pair_overlap(x["ROMol_A"], x["ROMol_B"]), axis=1)
+    pair_df["overlap"] = pair_df.apply(
+        lambda x: pair_overlap(x["ROMol_A"], x["ROMol_B"]), axis=1
+    )
     overlapping = pair_df["overlap"] > overlap_cutoff
     mrich.var(f"#(overlap > {overlap_cutoff})", len(pair_df[overlapping]), "pairs")
     pair_df = pair_df[~overlapping]
 
     # filter by distance
-    pair_df["distance"] = pair_df.apply(lambda x: pair_min_distance(x["ROMol_A"], x["ROMol_B"]), axis=1)
+    pair_df["distance"] = pair_df.apply(
+        lambda x: pair_min_distance(x["ROMol_A"], x["ROMol_B"]), axis=1
+    )
     distant = pair_df["distance"] > distance_cutoff
     mrich.var(f"#(distance > {distance_cutoff})", len(pair_df[distant]), "pairs")
     pair_df = pair_df[~distant]
-    
+
     mrich.var(f"#pairs (post-filter)", len(pair_df), "pairs")
 
     # get subnodes
@@ -66,6 +70,5 @@ def fragment(
         subnodes = get_subnodes(smiles)
         print(subnodes)
         # break
-    
+
     return pair_df
-    

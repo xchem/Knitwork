@@ -1,4 +1,3 @@
-
 import json
 import mrich
 from pathlib import Path
@@ -17,11 +16,12 @@ VARIABLES = [
 ]
 
 DEFAULTS = {
-    "FRAGMENT_TERMINAL_SYNTHONS":True,
-    "FRAGMENT_TERMINAL_SUBNODES":True,
-    "FRAGMENT_OVERLAP_CUTOFF":0.56,
-    "FRAGMENT_DISTANCE_CUTOFF":5.0,
+    "FRAGMENT_TERMINAL_SYNTHONS": True,
+    "FRAGMENT_TERMINAL_SUBNODES": True,
+    "FRAGMENT_OVERLAP_CUTOFF": 0.56,
+    "FRAGMENT_DISTANCE_CUTOFF": 5.0,
 }
+
 
 def load_config():
 
@@ -33,13 +33,16 @@ def load_config():
         dump_config(config)
         return config
 
+
 def dump_config(config):
     mrich.writing(CONFIG_PATH)
     json.dump(config, open(CONFIG_PATH, "wt"), indent=2)
 
+
 def setup_config():
     global CONFIG
     CONFIG = load_config()
+
 
 # if __name__ == "__main__":
 setup_config()
