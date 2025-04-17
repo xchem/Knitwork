@@ -1,0 +1,27 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+[project]
+name = "FragmentKnitwork"
+version = "1"
+authors = [
+    { name = "Max Winokan", email = "max@winokan.com" },
+]
+description = "FragmentKnitwork"
+readme = "README.md"
+requires-python = ">=3.10"
+requires = []
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+]
+[project.urls]
+"Homepage" = "https://github.com/xchem/FragmentKnitwork"
+"Bug Tracker" = "https://github.com/xchem/FragmentKnitwork/issues"
+[tool.hatch.build]
+include = [
+    "knitwork/*.py",
+]
