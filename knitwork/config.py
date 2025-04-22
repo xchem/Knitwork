@@ -13,6 +13,9 @@ VARIABLES = [
     "FRAGMENT_DISTANCE_CUTOFF",
     "FRAGMENT_TERMINAL_SYNTHONS",
     "FRAGMENT_TERMINAL_SUBNODES",
+    "FRAGMENT_CHECK_SINGLE_MOL",
+    "FRAGMENT_CHECK_CARBONS",
+    "FRAGMENT_CHECK_CARBON_RING",
 ]
 
 DEFAULTS = {
@@ -20,6 +23,10 @@ DEFAULTS = {
     "FRAGMENT_TERMINAL_SUBNODES": True,
     "FRAGMENT_OVERLAP_CUTOFF": 0.56,
     "FRAGMENT_DISTANCE_CUTOFF": 5.0,
+    "FRAGMENT_CHECK_SINGLE_MOL": True,
+    "FRAGMENT_CHECK_CARBONS": True,
+    "FRAGMENT_CHECK_CARBON_RING": True,
+    "FRAGMENT_MIN_CARBONS": 3,
 }
 
 
@@ -42,6 +49,16 @@ def dump_config(config):
 def setup_config():
     global CONFIG
     CONFIG = load_config()
+
+
+def print_config(prefix=None):
+    if prefix:
+        mrich.var(
+            f"CONFIG ({prefix})",
+            {k: v for k, v in CONFIG.items() if k.startswith(prefix)},
+        )
+    else:
+        mrich.var("CONFIG", CONFIG)
 
 
 # if __name__ == "__main__":
