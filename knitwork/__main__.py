@@ -37,6 +37,11 @@ def configure(
         mrich.var("accepted variables", VARIABLES, separator=":")
         raise ValueError(f"'{var}' is not configurable")
 
+    if value == "False":
+        value = False
+    elif value == "True":
+        value = True
+
     mrich.var(var, value)
 
     CONFIG[var] = value
