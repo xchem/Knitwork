@@ -32,7 +32,7 @@ async def aget_driver():
     )
 
 
-async def run_query(query, **kwargs):
+async def arun_query(query, **kwargs):
     driver = await aget_driver()
     async with driver:
         async with driver.session() as session:
@@ -40,6 +40,13 @@ async def run_query(query, **kwargs):
             records = [record async for record in result]
             return records
 
+def run_query(query, **kwargs):
+    driver = get_driver()
+    with driver:
+        with driver.session() as session:
+            result = session.run(query, **kwargs)
+            records = [record for record in result]
+            return records
 
 async def aget_subnodes(
     smiles: str,
@@ -57,17 +64,17 @@ async def aget_subnodes(
 
     if terminal_nodes:
         query = """
-        MATCH (a:F2 {smiles: $smiles})-[e:FRAG*0..20]->(f:F2)
+        MATCH (a:F2 {smiles: $smiles})-[e:FRAG*0..15]->(f:F2)
         WHERE NOT ()-[:FRAG]-(f)-[:FRAG]->()
         RETURN f
         """
     else:
         query = """
-        MATCH (fa:F2 {smiles: $smiles})-[e:FRAG*0..20]->(f:F2) 
+        MATCH (fa:F2 {smiles: $smiles})-[e:FRAG*0..15]->(f:F2) 
         RETURN f
         """
 
-    records = await run_query(query, smiles=smiles)
+    records = await arun_query(query, smiles=smiles)
     subnodes = [record["f"]["smiles"] for record in records]
 
     if progress:
@@ -93,17 +100,17 @@ async def aget_synthons(
 
     if terminal_nodes:
         query = """
-        MATCH (a:F2 {smiles: $smiles})-[e:FRAG*0..20]->(b:F2)
+        MATCH (a:F2 {smiles: $smiles})-[e:FRAG*0..15]->(b:F2)
         WHERE NOT ()-[:FRAG]-(b)-[:FRAG]->()
         RETURN e[-1] as edge
         """
     else:
         query = """
-        MATCH (a:F2 {smiles: $smiles})-[e:FRAG*0..20]->(b:F2)
+        MATCH (a:F2 {smiles: $smiles})-[e:FRAG*0..15]->(b:F2)
         RETURN e[-1] as edge
         """
 
-    records = await run_query(query, smiles=smiles)
+    records = await arun_query(query, smiles=smiles)
     edges = [edge for record in records if (edge := record["edge"])]
 
     synthons = set()
@@ -123,3 +130,31 @@ async def aget_synthons(
         progress.update(task, advance=1)
 
     return synthons
+
+async def aget_r_groups(
+    smiles:str,
+    progress=None,
+    task=None,
+):
+
+    query = """
+    MATCH (a:F2 {smiles: $smiles})-[e:FRAG*0..15]->(b:F2)
+    WHERE NOT ()-[:FRAG]-(b)-[:FRAG]->()
+    AND e[-1].prop_synthon contains '[Xe]'
+    AND NOT e[-1].prop_synthon=e[-2].prop_synthon
+    RETURN e[-1].prop_synthon as synthon, e[-2].prop_synthon as r_group;
+    """
+
+    # records = await arun_query(query, smiles=smiles)
+
+    # results = []
+    # for record in records:
+    #     results.append((record["synthon"], record["r_group"]))
+
+    # if progress:
+    #     progress.update(task, advance=1)
+
+    results = []
+        
+    return results
+    

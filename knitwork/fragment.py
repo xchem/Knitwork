@@ -3,11 +3,11 @@ from mrich import print
 from pathlib import Path
 from .config import CONFIG, print_config
 import asyncio
-from .query import aget_subnodes, aget_synthons
+from .query import aget_subnodes, aget_synthons, aget_r_groups
 from rich.progress import Progress
 
 MOL_CACHE = {}
-
+MOL_C = None
 
 def fragment(
     input_sdf: Path,
@@ -17,9 +17,12 @@ def fragment(
 ):
 
     import pandas as pd
-    from rdkit.Chem import PandasTools, MolToSmiles
+    from rdkit.Chem import PandasTools, MolToSmiles, MolFromSmarts
     from itertools import permutations
     from .tools import pair_overlap, pair_min_distance
+
+    global MOL_C
+    MOL_C = MolFromSmarts("[#6]")
 
     mrich.h2("knitwork.fragment.fragment()")
 
@@ -29,6 +32,7 @@ def fragment(
     # print config
     mrich.var("input_sdf", input_sdf)
     mrich.var("output_dir", output_dir)
+    print_config("GRAPH_LOCATION")
     print_config("FRAGMENT")
 
     # check paths
@@ -52,7 +56,8 @@ def fragment(
         mrich.var("#unique smiles", n_unique)
         t1 = progress.add_task("query subnodes", total=n_unique)
         t2 = progress.add_task("query synthons", total=n_unique)
-        results = asyncio.run(fragment_tasks(smiles_list, progress, (t1, t2)))
+        t3 = progress.add_task("query r_groups", total=n_unique)
+        results = asyncio.run(fragment_tasks(smiles_list, progress, (t1, t2, t3)))
 
     # filter results
     for smiles, v in results.items():
@@ -62,6 +67,7 @@ def fragment(
     # update molecule dataframe
     mol_df["subnodes"] = mol_df["smiles"].map(lambda s: results[s]["subnodes"])
     mol_df["synthons"] = mol_df["smiles"].map(lambda s: results[s]["synthons"])
+    mol_df["r_groups"] = mol_df["smiles"].map(lambda s: results[s]["r_groups"])
 
     # write mol_df
     mol_df_path = output_dir / "molecules.pkl.gz"
@@ -112,12 +118,13 @@ def fragment(
 
 async def fragment_tasks(smiles_list, progress, tasks):
 
-    t1, t2 = tasks
+    t1, t2, t3 = tasks
 
     tasks = [
         asyncio.gather(
             aget_subnodes(smiles, progress=progress, task=t1),
             aget_synthons(smiles, progress=progress, task=t2),
+            aget_r_groups(smiles, progress=progress, task=t3),
         )
         for smiles in smiles_list
     ]
@@ -125,16 +132,14 @@ async def fragment_tasks(smiles_list, progress, tasks):
     results = await asyncio.gather(*tasks)
 
     return {
-        smiles: {"subnodes": subnodes, "synthons": synthons}
-        for smiles, (subnodes, synthons) in zip(smiles_list, results)
+        smiles: {"subnodes": subnodes, "synthons": synthons, "r_groups":r_groups}
+        for smiles, (subnodes, synthons, r_groups) in zip(smiles_list, results)
     }
 
 
 def filter_smiles_list(smiles_list, synthons: bool):
 
     from rdkit import Chem
-
-    c = Chem.MolFromSmarts("[#6]")
 
     filtered = [s for s in smiles_list]
     if CONFIG["FRAGMENT_CHECK_SINGLE_MOL"]:
@@ -146,7 +151,7 @@ def filter_smiles_list(smiles_list, synthons: bool):
             s
             for s in filtered
             if len(
-                MOL_CACHE.setdefault(s, Chem.MolFromSmiles(s)).GetSubstructMatches(c)
+                MOL_CACHE.setdefault(s, Chem.MolFromSmiles(s)).GetSubstructMatches(MOL_C)
             )
             >= n_c
         ]
@@ -162,7 +167,7 @@ def filter_smiles_list(smiles_list, synthons: bool):
                 new_filtered.append(s)
 
             num_ring_atoms = sum([atom.IsInRing() for atom in mol.GetAtoms()])
-            num_carbons = len(mol.GetSubstructMatches(c))
+            num_carbons = len(mol.GetSubstructMatches(MOL_C))
             num_atoms = mol.GetNumAtoms()
 
             # one atom will be a xenon (attachment point)
