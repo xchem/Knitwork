@@ -145,16 +145,14 @@ async def aget_r_groups(
     RETURN e[-1].prop_synthon as synthon, e[-2].prop_synthon as r_group;
     """
 
-    # records = await arun_query(query, smiles=smiles)
-
-    # results = []
-    # for record in records:
-    #     results.append((record["synthon"], record["r_group"]))
-
-    # if progress:
-    #     progress.update(task, advance=1)
+    records = await arun_query(query, smiles=smiles)
 
     results = []
+    for record in records:
+        results.append((record["synthon"], record["r_group"]))
+
+    if progress:
+        progress.update(task, advance=1)
         
     return results
     

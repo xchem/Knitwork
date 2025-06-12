@@ -28,8 +28,6 @@ def configure(
     value: str,
 ):
 
-    mrich.h1("CONFIGURE")
-
     from .config import VARIABLES, CONFIG, dump_config
 
     if var not in VARIABLES:
