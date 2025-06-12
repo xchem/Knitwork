@@ -1,6 +1,7 @@
 import mrich
 from typer import Typer
 from pathlib import Path
+import json
 
 app = Typer()
 
@@ -12,13 +13,41 @@ def fragment(
 ):
     mrich.h1("FRAGMENT")
     from .fragment import fragment
+    from rdkit.Chem import PandasTools
 
-    fragment(input_sdf, output_dir)
+    input_sdf = Path(input_sdf)
+    mrich.var("input_sdf", input_sdf)
+    mol_df = PandasTools.LoadSDF(str(input_sdf.resolve()))
+
+    fragment(mol_df, output_dir)
 
 
 @app.command()
-def knit():
-    mrich.h1("KNIT")
+def pure_merge(
+    # pairs_df: str,
+    fragment_dir: str = "fragment_output",
+    output_dir: str = "knitwork_output",
+):
+    mrich.h1("PURE MERGE")
+    from .knit import pure_merge
+    import pandas as pd
+
+    fragment_dir = Path(fragment_dir)
+    mrich.var("fragment_dir", fragment_dir)
+    mrich.var("output_dir", output_dir)
+    assert fragment_dir.exists()
+    assert fragment_dir.is_dir()
+
+    pairs_df = fragment_dir / "pairs.pkl.gz"
+    mrich.var("pairs_df", pairs_df)
+    pairs_df = pd.read_pickle(pairs_df)
+
+    pure_merge(pairs_df=pairs_df, output_dir=output_dir)
+
+
+@app.command()
+def impure_merge():
+    mrich.h1("IMPURE MERGE")
     raise NotImplementedError
 
 
@@ -35,10 +64,19 @@ def configure(
         mrich.var("accepted variables", VARIABLES, separator=":")
         raise ValueError(f"'{var}' is not configurable")
 
-    if value == "False":
-        value = False
-    elif value == "True":
-        value = True
+    t = VARIABLES[var]
+
+    mrich.var(var, value)
+
+    if t == bool:
+        if value == "False":
+            value = False
+        elif value == "True":
+            value = True
+        else:
+            raise ValueError("value must be 'True' or 'False'")
+    elif t != str:
+        value = t(value)
 
     mrich.var(var, value)
 

@@ -5,15 +5,18 @@ from .config import CONFIG, print_config
 import asyncio
 from .query import aget_subnodes, aget_synthons, aget_r_groups
 from rich.progress import Progress
+from rdkit import Chem
 
 MOL_CACHE = {}
 MOL_C = None
 
+
 def fragment(
-    input_sdf: Path,
+    mol_df: "pd.DataFrame",
     output_dir: Path | str = "fragment_output",
     overlap_cutoff: float = CONFIG["FRAGMENT_OVERLAP_CUTOFF"],
     distance_cutoff: float = CONFIG["FRAGMENT_DISTANCE_CUTOFF"],
+    discard_props: bool = True,
 ):
 
     import pandas as pd
@@ -26,25 +29,22 @@ def fragment(
 
     mrich.h2("knitwork.fragment.fragment()")
 
-    input_sdf = Path(input_sdf)
     output_dir = Path(output_dir)
 
     # print config
-    mrich.var("input_sdf", input_sdf)
     mrich.var("output_dir", output_dir)
     print_config("GRAPH_LOCATION")
     print_config("FRAGMENT")
 
     # check paths
-    assert input_sdf.exists()
     if not output_dir.exists():
         mrich.writing(output_dir)
         output_dir.mkdir(parents=True)
 
     # get mols
-    mol_df = PandasTools.LoadSDF(str(input_sdf.resolve()))
-    mol_df = mol_df[["ID", "ROMol"]]
-    mol_df["smiles"] = mol_df.apply(lambda x: MolToSmiles(x.ROMol), axis=1)
+    if discard_props:
+        mol_df = mol_df[["ID", "ROMol"]].copy()
+    mol_df.loc[:, "smiles"] = mol_df.apply(lambda x: MolToSmiles(x.ROMol), axis=1)
     MOL_CACHE.update({r["smiles"]: r["ROMol"] for i, r in mol_df.iterrows()})
     n_molecules = len(mol_df)
     mrich.var("#molecules", n_molecules)
@@ -65,9 +65,27 @@ def fragment(
         v["synthons"] = filter_smiles_list(v["synthons"], synthons=True)
 
     # update molecule dataframe
-    mol_df["subnodes"] = mol_df["smiles"].map(lambda s: results[s]["subnodes"])
-    mol_df["synthons"] = mol_df["smiles"].map(lambda s: results[s]["synthons"])
-    mol_df["r_groups"] = mol_df["smiles"].map(lambda s: results[s]["r_groups"])
+    mol_df.loc[:, "subnodes"] = mol_df["smiles"].map(lambda s: results[s]["subnodes"])
+    mol_df.loc[:, "synthons"] = mol_df["smiles"].map(lambda s: results[s]["synthons"])
+    mol_df.loc[:, "r_groups"] = mol_df["smiles"].map(lambda s: results[s]["r_groups"])
+
+    # construct subnodes from synthons
+    for i, row in mol_df.iterrows():
+        for synthon in row["synthons"]:
+            mol = Chem.MolFromSmiles("[Xe]c1cscn1")
+            atoms_to_remove = [
+                atom.GetIdx() for atom in mol.GetAtoms() if atom.GetAtomicNum() == 54
+            ]
+            emol = Chem.EditableMol(mol)
+            for idx in sorted(
+                atoms_to_remove, reverse=True
+            ):  # reverse to avoid index shift
+                emol.RemoveAtom(idx)
+            new_mol = emol.GetMol()
+            Chem.SanitizeMol(new_mol)
+            new_s = Chem.MolToSmiles(new_mol)
+            if new_s not in row["subnodes"]:
+                mol_df.loc[i, "subnodes"].append(new_s)
 
     # write mol_df
     mol_df_path = output_dir / "molecules.pkl.gz"
@@ -132,7 +150,7 @@ async def fragment_tasks(smiles_list, progress, tasks):
     results = await asyncio.gather(*tasks)
 
     return {
-        smiles: {"subnodes": subnodes, "synthons": synthons, "r_groups":r_groups}
+        smiles: {"subnodes": subnodes, "synthons": synthons, "r_groups": r_groups}
         for smiles, (subnodes, synthons, r_groups) in zip(smiles_list, results)
     }
 
@@ -151,7 +169,9 @@ def filter_smiles_list(smiles_list, synthons: bool):
             s
             for s in filtered
             if len(
-                MOL_CACHE.setdefault(s, Chem.MolFromSmiles(s)).GetSubstructMatches(MOL_C)
+                MOL_CACHE.setdefault(s, Chem.MolFromSmiles(s)).GetSubstructMatches(
+                    MOL_C
+                )
             )
             >= n_c
         ]

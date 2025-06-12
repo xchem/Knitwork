@@ -4,6 +4,9 @@ import mrich
 from mrich import print
 import asyncio
 
+import json
+import time
+
 
 def check_config():
     graph_vars = ["GRAPH_LOCATION", "GRAPH_USERNAME", "GRAPH_PASSWORD"]
@@ -40,6 +43,7 @@ async def arun_query(query, **kwargs):
             records = [record async for record in result]
             return records
 
+
 def run_query(query, **kwargs):
     driver = get_driver()
     with driver:
@@ -47,6 +51,7 @@ def run_query(query, **kwargs):
             result = session.run(query, **kwargs)
             records = [record for record in result]
             return records
+
 
 async def aget_subnodes(
     smiles: str,
@@ -64,13 +69,13 @@ async def aget_subnodes(
 
     if terminal_nodes:
         query = """
-        MATCH (a:F2 {smiles: $smiles})-[e:FRAG*0..15]->(f:F2)
+        MATCH (a:F2 {smiles: $smiles})-[e:FRAG*0..20]->(f:F2)
         WHERE NOT ()-[:FRAG]-(f)-[:FRAG]->()
         RETURN f
         """
     else:
         query = """
-        MATCH (fa:F2 {smiles: $smiles})-[e:FRAG*0..15]->(f:F2) 
+        MATCH (fa:F2 {smiles: $smiles})-[e:FRAG*0..20]->(f:F2) 
         RETURN f
         """
 
@@ -131,8 +136,9 @@ async def aget_synthons(
 
     return synthons
 
+
 async def aget_r_groups(
-    smiles:str,
+    smiles: str,
     progress=None,
     task=None,
 ):
@@ -153,6 +159,50 @@ async def aget_r_groups(
 
     if progress:
         progress.update(task, advance=1)
-        
+
     return results
-    
+
+
+async def aget_pure_expansions(
+    smiles: str,
+    synthon: str,
+    num_hops: int = 2,
+    limit: int = 5,
+    progress=None,
+    task=None,
+    cache_dir=None,
+):
+    if cache_dir:
+        cache_file = cache_dir / f"{smiles}_{synthon}_{num_hops}_{limit}.json"
+        if cache_file.exists():
+            if progress:
+                progress.update(task, advance=1)
+            return json.load(open(cache_file, "rt"))
+
+    query = """
+    MATCH (a:F2 {smiles: $smiles})<-[:FRAG*0..%(num_hops)d]-(b:F2)<-[e:FRAG]-(c:Mol)
+    WHERE e.prop_synthon=$synthon
+    WITH c.smiles as smi, c.cmpd_ids as ids
+    RETURN smi, ids
+    """ % {
+        "num_hops": num_hops
+    }
+
+    if limit:
+        query = query + f" LIMIT {limit}"
+
+    # start = time.time()
+
+    records = await arun_query(query, smiles=smiles, synthon=synthon)
+
+    results = []
+    for record in records:
+        results.append((record["ids"], record["smi"]))
+
+    if progress:
+        progress.update(task, advance=1)
+
+    if cache_dir:
+        json.dump(results, open(cache_file, "wt"), indent=2)
+
+    return results
