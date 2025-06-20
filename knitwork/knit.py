@@ -1,11 +1,12 @@
 import pandas as pd
 from mrich import print
 import mrich
-from .query import aget_pure_expansions
+from .query import get_pure_expansions
 from .config import CONFIG, print_config
 import time
 from rich.progress import Progress
 import asyncio
+from joblib import Parallel, delayed
 
 # import sys
 # import json
@@ -35,13 +36,11 @@ def pure_merge(
 
     substructure_pairs = get_unique_substructure_pairs(pairs_df)
 
-    # asynchronous expansion queries
-    with Progress() as progress:
-        n_unique = len(substructure_pairs)
-        task = progress.add_task("query pure_expansions", total=n_unique)
-        results = asyncio.run(
-            pure_merge_task(substructure_pairs, cache_dir, progress, task)
-        )
+    # parallel merging
+    results = Parallel(
+        n_jobs=CONFIG["KNITWORK_NUM_CONNECTIONS"],
+        backend="multiprocessing"
+    )(delayed(get_pure_expansions)(smiles, synthon, cache_dir=cache_dir) for _, smiles, synthon in substructure_pairs)
 
     if not results:
         mrich.error("No results")
@@ -101,41 +100,3 @@ def get_unique_substructure_pairs(df):
     mrich.var("#unique substructure pairs", len(substructure_pairs))
 
     return substructure_pairs
-
-
-semaphore = asyncio.Semaphore(CONFIG["KNITWORK_NUM_CONNECTIONS"])
-
-
-async def limited_aget_pure_expansions(*args, **kwargs):
-    async with semaphore:
-        return await aget_pure_expansions(*args, **kwargs)
-
-
-async def pure_merge_task(
-    substructure_pairs, cache_dir=None, progress=None, prog_task=None
-):
-
-    results = None
-
-    try:
-        async with asyncio.TaskGroup() as tg:
-            tasks = [
-                tg.create_task(
-                    aget_pure_expansions(
-                        smiles,
-                        synthon,
-                        cache_dir=cache_dir,
-                        progress=progress,
-                        task=prog_task,
-                    )
-                )
-                for _, smiles, synthon in substructure_pairs
-            ]
-
-        results = [task.result() for task in tasks]
-
-    except* Exception as eg:
-        for i, e in enumerate(eg.exceptions):
-            mrich.error(f"[{i}] Task failed: {e}")
-
-    return results
