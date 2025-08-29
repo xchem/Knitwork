@@ -27,6 +27,7 @@ def pure_merge(
     # pairs_df: str,
     fragment_dir: str = "fragment_output",
     output_dir: str = "knitwork_output",
+    cached_only: bool = False,
 ):
     mrich.h1("PURE MERGE")
     from .knit import pure_merge
@@ -42,7 +43,7 @@ def pure_merge(
     mrich.var("pairs_df", pairs_df)
     pairs_df = pd.read_pickle(pairs_df)
 
-    pure_merge(pairs_df=pairs_df, output_dir=output_dir)
+    pure_merge(pairs_df=pairs_df, output_dir=output_dir, cached_only=cached_only)
 
 
 @app.command()

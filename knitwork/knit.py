@@ -17,6 +17,7 @@ from rdkit.Chem import MolFromSmiles, PandasTools
 def pure_merge(
     pairs_df: "pd.DataFrame",
     output_dir: str = "knitwork_output",
+    cached_only: bool = False,
 ):
 
     mrich.h2("knitwork.knit.pure_merge()")
@@ -40,8 +41,8 @@ def pure_merge(
     results = Parallel(
         n_jobs=CONFIG["KNITWORK_NUM_CONNECTIONS"],
         backend="multiprocessing"
-    )(delayed(get_pure_expansions)(smiles, synthon, cache_dir=cache_dir) for _, smiles, synthon in substructure_pairs)
-
+    )(delayed(get_pure_expansions)(smiles, synthon, index=i, cache_dir=cache_dir, cached_only=cached_only) for i, (_, smiles, synthon) in enumerate(substructure_pairs))
+    
     if not results:
         mrich.error("No results")
         return None
@@ -49,6 +50,11 @@ def pure_merge(
     # process results
     data = []
     for ((hit1, hit2), subnode, synthon), result in zip(substructure_pairs, results):
+
+        if result is None:
+            mrich.warning("Skipping", hit1, hit2, subnode, synthon)
+            continue
+        
         for names, merge in result:
             data.append(
                 dict(
