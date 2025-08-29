@@ -162,67 +162,23 @@ async def aget_r_groups(
 
     return results
 
-
-async def aget_pure_expansions(
-    smiles: str,
-    synthon: str,
-    num_hops: int = 2,
-    limit: int = 5,
-    progress=None,
-    task=None,
-    cache_dir=None,
-):
-    if cache_dir:
-        cache_file = cache_dir / f"{smiles}_{synthon}_{num_hops}_{limit}.json"
-        if cache_file.exists():
-            if progress:
-                progress.update(task, advance=1)
-            return json.load(open(cache_file, "rt"))
-
-    query = """
-    MATCH (a:F2 {smiles: $smiles})<-[:FRAG*0..%(num_hops)d]-(b:F2)<-[e:FRAG]-(c:Mol)
-    WHERE e.prop_synthon=$synthon
-    WITH c.smiles as smi, c.cmpd_ids as ids
-    RETURN smi, ids
-    """ % {
-        "num_hops": num_hops
-    }
-
-    if limit:
-        query = query + f" LIMIT {limit}"
-
-    # start = time.time()
-
-    records = await arun_query(query, smiles=smiles, synthon=synthon)
-
-    results = []
-    for record in records:
-        results.append((record["ids"], record["smi"]))
-
-    if progress:
-        progress.update(task, advance=1)
-
-    if cache_dir:
-        json.dump(results, open(cache_file, "wt"), indent=2)
-
-    return results
-
 def get_pure_expansions(
     smiles: str,
     synthon: str,
     num_hops: int = 2,
     limit: int = 5,
-    progress=None,
-    task=None,
+    index: int | None = None,
     cache_dir=None,
+    cached_only=False,
 ):
     
     if cache_dir:
         cache_file = cache_dir / f"{smiles}_{synthon}_{num_hops}_{limit}.json"
         if cache_file.exists():
-            if progress:
-                progress.update(task, advance=1)
+            mrich.print("Using cache", index, smiles, synthon)
             return json.load(open(cache_file, "rt"))
+        elif cached_only:
+            return None
 
     query = """
     MATCH (a:F2 {smiles: $smiles})<-[:FRAG*0..%(num_hops)d]-(b:F2)<-[e:FRAG]-(c:Mol)
@@ -238,22 +194,21 @@ def get_pure_expansions(
 
     # start = time.time()
 
-    mrich.debug(smiles, synthon, num_hops, limit, cache_dir)
+    mrich.print("Starting query", index, smiles, synthon)
 
     try:
         records = run_query(query, smiles=smiles, synthon=synthon)
     except Exception as e:
-        mrich.error(e)
-        raise Exception(str(e))
+        mrich.error(index, e)
+        raise Exception(f"{smiles=} {synthon=} {e}")
 
     results = []
     for record in records:
         results.append((record["ids"], record["smi"]))
 
-    if progress:
-        progress.update(task, advance=1)
-
     if cache_dir:
         json.dump(results, open(cache_file, "wt"), indent=2)
+
+    mrich.success(index, smiles, synthon, "#results:", len(results))
 
     return results
