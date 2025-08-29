@@ -1,6 +1,14 @@
 # Knitwork
 refactor of FragmentKnitwork
 
+## Installation
+
+```
+git clone https://github.com/xchem/Knitwork
+cd Knitwork
+pip install --user -e .
+```
+
 ## Configuration
 
 The `configure` command can be used to set variables that the package will use when running commands:
@@ -8,9 +16,9 @@ The `configure` command can be used to set variables that the package will use w
 e.g.
 
 ```
+python -m knitwork configure GRAPH_LOCATION XXXXX
 python -m knitwork configure GRAPH_USERNAME XXXXX
 python -m knitwork configure GRAPH_PASSWORD XXXXX
-python -m knitwork configure GRAPH_LOCATION XXXXX
 ```
 
 ## Running the Fragment process
