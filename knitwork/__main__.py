@@ -24,9 +24,9 @@ def fragment(
 
 @app.command()
 def pure_merge(
-    # pairs_df: str,
     fragment_dir: str = "fragment_output",
     output_dir: str = "knitwork_output",
+    cached_only: bool = False,
 ):
     mrich.h1("PURE MERGE")
     from .knit import pure_merge
@@ -42,13 +42,30 @@ def pure_merge(
     mrich.var("pairs_df", pairs_df)
     pairs_df = pd.read_pickle(pairs_df)
 
-    pure_merge(pairs_df=pairs_df, output_dir=output_dir)
+    pure_merge(pairs_df=pairs_df, output_dir=output_dir, cached_only=cached_only)
 
 
 @app.command()
-def impure_merge():
+def impure_merge(
+    fragment_dir: str = "fragment_output",
+    output_dir: str = "knitwork_output",
+    cached_only: bool = False,
+):
     mrich.h1("IMPURE MERGE")
-    raise NotImplementedError
+    from .knit import impure_merge
+    import pandas as pd
+
+    fragment_dir = Path(fragment_dir)
+    mrich.var("fragment_dir", fragment_dir)
+    mrich.var("output_dir", output_dir)
+    assert fragment_dir.exists()
+    assert fragment_dir.is_dir()
+
+    pairs_df = fragment_dir / "pairs.pkl.gz"
+    mrich.var("pairs_df", pairs_df)
+    pairs_df = pd.read_pickle(pairs_df)
+
+    impure_merge(pairs_df=pairs_df, output_dir=output_dir, cached_only=cached_only)
 
 
 @app.command()

@@ -1,7 +1,8 @@
 import pandas as pd
 from mrich import print
 import mrich
-from .query import get_pure_expansions
+from .query import get_pure_expansions, get_impure_expansions
+from .tools import load_sig_factory
 from .config import CONFIG, print_config
 import time
 from rich.progress import Progress
@@ -17,30 +18,27 @@ from rdkit.Chem import MolFromSmiles, PandasTools
 def pure_merge(
     pairs_df: "pd.DataFrame",
     output_dir: str = "knitwork_output",
-):
+    cached_only: bool = False,
+) -> "pd.DataFrame":
+    """Generate 'pure' Knitwork merges'"""
 
     mrich.h2("knitwork.knit.pure_merge()")
     print_config("GRAPH_LOCATION")
     print_config("KNITWORK")
 
-    output_dir = Path(output_dir)
-    if not output_dir.exists():
-        mrich.writing(output_dir)
-        output_dir.mkdir(parents=True)
-
-    cache_dir = output_dir / "cache"
-    mrich.var("cache_dir", cache_dir)
-    if not cache_dir.exists():
-        mrich.writing(cache_dir)
-        cache_dir.mkdir(parents=True)
+    output_dir, cache_dir = create_dirs(output_dir)
 
     substructure_pairs = get_unique_substructure_pairs(pairs_df)
 
     # parallel merging
     results = Parallel(
-        n_jobs=CONFIG["KNITWORK_NUM_CONNECTIONS"],
-        backend="multiprocessing"
-    )(delayed(get_pure_expansions)(smiles, synthon, cache_dir=cache_dir) for _, smiles, synthon in substructure_pairs)
+        n_jobs=CONFIG["KNITWORK_NUM_CONNECTIONS"], backend="multiprocessing"
+    )(
+        delayed(get_pure_expansions)(
+            smiles, synthon, index=i, cache_dir=cache_dir, cached_only=cached_only
+        )
+        for i, (_, smiles, synthon) in enumerate(substructure_pairs)
+    )
 
     if not results:
         mrich.error("No results")
@@ -49,6 +47,11 @@ def pure_merge(
     # process results
     data = []
     for ((hit1, hit2), subnode, synthon), result in zip(substructure_pairs, results):
+
+        if result is None:
+            mrich.warning("Skipping", hit1, hit2, subnode, synthon)
+            continue
+
         for names, merge in result:
             data.append(
                 dict(
@@ -85,6 +88,53 @@ def pure_merge(
     )
 
     return df
+
+
+def impure_merge(
+    pairs_df: "pd.DataFrame",
+    output_dir: str = "knitwork_output",
+    cached_only: bool = False,
+) -> "pd.DataFrame":
+    """Generate 'impure' Knitwork merges'"""
+
+    mrich.h2("knitwork.knit.impure_merge()")
+    print_config("GRAPH_LOCATION")
+    print_config("KNITWORK")
+
+    output_dir, cache_dir = create_dirs(output_dir)
+
+    substructure_pairs = get_unique_substructure_pairs(pairs_df)
+
+    sig_factory = load_sig_factory()
+
+    # parallel merging
+    results = Parallel(
+        n_jobs=CONFIG["KNITWORK_NUM_CONNECTIONS"], backend="multiprocessing"
+    )(
+        delayed(get_impure_expansions)(
+            smiles, synthon, index=i, cache_dir=cache_dir, cached_only=cached_only
+        )
+        for i, (_, smiles, synthon) in enumerate(substructure_pairs)
+    )
+
+    # raise NotImplementedError
+
+
+def create_dirs(output_dir: str | Path) -> (Path, Path):
+    """Create output and cache directories"""
+
+    output_dir = Path(output_dir)
+    if not output_dir.exists():
+        mrich.writing(output_dir)
+        output_dir.mkdir(parents=True)
+
+    cache_dir = output_dir / "cache"
+    mrich.var("cache_dir", cache_dir)
+    if not cache_dir.exists():
+        mrich.writing(cache_dir)
+        cache_dir.mkdir(parents=True)
+
+    return output_dir, cache_dir
 
 
 def get_unique_substructure_pairs(df):
