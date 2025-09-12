@@ -1,19 +1,18 @@
-import pandas as pd
-from mrich import print
-import mrich
-from .query import get_pure_expansions, get_impure_expansions
-from .tools import load_sig_factory
-from .config import CONFIG, print_config
-import time
-from rich.progress import Progress
-import asyncio
-from joblib import Parallel, delayed
-from json import loads
 
-# import sys
-# import json
+import mrich
+from mrich import print
+
+import time
+import asyncio
+import pandas as pd
+from json import loads
 from pathlib import Path
+from rich.progress import Progress
+from joblib import Parallel, delayed
 from rdkit.Chem import MolFromSmiles, PandasTools
+
+from .config import CONFIG, print_config
+from .query import get_pure_expansions, get_impure_expansions
 
 
 def pure_merge(
@@ -106,13 +105,6 @@ def impure_merge(
     output_dir, cache_dir = create_dirs(output_dir)
 
     substructure_pairs = set(list(get_unique_substructure_pairs(pairs_df))[:1])
-
-
-    sig_factory = load_sig_factory(
-        fdef_file=CONFIG["FINGERPRINT_FDEF"],
-        max_point_count=CONFIG["FINGERPRINT_MAXPOINTCOUNT"],
-        bins=loads(CONFIG["FINGERPRINT_BINS"]),
-    )
 
     # parallel merging
     results = Parallel(

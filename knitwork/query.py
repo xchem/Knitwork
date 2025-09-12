@@ -1,11 +1,14 @@
-from neo4j import GraphDatabase, AsyncGraphDatabase
-from .config import CONFIG
 import mrich
 from mrich import print
-import asyncio
 
 import json
 import time
+import asyncio
+from rdkit.Chem import MolFromSmiles
+from neo4j import GraphDatabase, AsyncGraphDatabase
+
+from .config import CONFIG
+from .tools import load_sig_factory, calc_pharm_fp
 
 
 def check_config():
@@ -224,9 +227,6 @@ def get_impure_expansions(
     cached_only=False,
 ):
 
-    mrich.error("Not implemented")
-    return
-
     if cache_dir:
         cache_file = cache_dir / f"{smiles}_{synthon}_{num_hops}_{limit}.json"
         if cache_file.exists():
@@ -235,35 +235,56 @@ def get_impure_expansions(
         elif cached_only:
             return None
 
+    sig_factory = load_sig_factory(
+        fdef_file=CONFIG["FINGERPRINT_FDEF"],
+        max_point_count=CONFIG["FINGERPRINT_MAXPOINTCOUNT"],
+        bins=json.loads(CONFIG["FINGERPRINT_BINS"]),
+    )
+
+    vector = calc_pharm_fp(MolFromSmiles(synthon), sig_factory, as_str=False)
+
+    threshold = CONFIG["KNITWORK_SIMILARITY_THRESHOLD"]
+    metric = CONFIG["KNITWORK_SIMILARITY_METRIC"]
+
     query = """
     MATCH (a:F2 {smiles: $smiles})<-[:FRAG*0..%(num_hops)d]-(b:F2)<-[e:FRAG]-(c:Mol)
-    WHERE e.prop_synthon=$synthon
-    WITH c.smiles as smi, c.cmpd_ids as ids
-    RETURN smi, ids
+    WHERE e.prop_pharmfp IS NOT NULL
+    WITH usersimilarity.tanimoto_similarity(e.prop_pharmfp, $vector) as sim, c.smiles as smi, e.prop_synthon as syn, c.cmpd_ids as ids
+    WHERE sim >= $threshold
+    AND NOT e.prop_synthon=$query_synthon
+    RETURN smi, syn, sim, ids
     """ % {
-        "num_hops": num_hops
+        "vector": vector,  # a pre-computed fp for the query substructure used to calculate similarity
+        "threshold": threshold,  # a threshold for similarity to identify replacement subtructures
+        "metric": metric,  # TODO: not used here: we have manually specified the name of the similarity function
+        "num_hops": num_hops,
     }
 
     if limit:
         query = query + f" LIMIT {limit}"
 
-    # start = time.time()
+    start = time.time()
 
     mrich.print("Starting query", index, smiles, synthon)
 
     try:
-        records = run_query(query, smiles=smiles, synthon=synthon)
+        records = run_query(query, smiles=smiles, query_synthon=synthon)
     except Exception as e:
         mrich.error(index, e)
         raise Exception(f"{smiles=} {synthon=} {e}")
 
     results = []
-    for record in records:
-        results.append((record["ids"], record["smi"]))
-
+    for records in records:
+        results.append((
+            res["smi"], # expansion
+            res["syn"], # synthon
+            res["sim"], # similarity
+            res["ids"], # compound_id
+        ))
+    
     if cache_dir:
         json.dump(results, open(cache_file, "wt"), indent=2)
-
+    
     mrich.success(index, smiles, synthon, "#results:", len(results))
 
     return results
