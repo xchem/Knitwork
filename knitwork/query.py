@@ -254,8 +254,10 @@ def get_impure_expansions(
     WHERE sim >= $threshold
     AND NOT e.prop_synthon=$query_synthon
     RETURN smi, syn, sim, ids
-    """
-    
+    """ % {
+        "num_hops":num_hops,
+    }
+
     if limit:
         query = query + f" LIMIT {limit}"
 
@@ -270,7 +272,7 @@ def get_impure_expansions(
             vector=vector,
             threshold=threshold,
             metric=metric,
-            num_hops=num_hops,
+            # num_hops=num_hops,
         )
     except Exception as e:
         mrich.error(index, e)
