@@ -8,6 +8,7 @@ import time
 from rich.progress import Progress
 import asyncio
 from joblib import Parallel, delayed
+from json import loads
 
 # import sys
 # import json
@@ -100,12 +101,18 @@ def impure_merge(
     mrich.h2("knitwork.knit.impure_merge()")
     print_config("GRAPH_LOCATION")
     print_config("KNITWORK")
+    print_config("FINGERPRINT")
 
     output_dir, cache_dir = create_dirs(output_dir)
 
-    substructure_pairs = get_unique_substructure_pairs(pairs_df)
+    substructure_pairs = set(list(get_unique_substructure_pairs(pairs_df))[:1])
 
-    sig_factory = load_sig_factory()
+
+    sig_factory = load_sig_factory(
+        fdef_file=CONFIG["FINGERPRINT_FDEF"],
+        max_point_count=CONFIG["FINGERPRINT_MAXPOINTCOUNT"],
+        bins=loads(CONFIG["FINGERPRINT_BINS"]),
+    )
 
     # parallel merging
     results = Parallel(

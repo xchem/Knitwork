@@ -176,3 +176,4 @@ config.json
 fragment_output
 *.sublime-*
 *.ipynb
+.DS_Store

@@ -4,6 +4,7 @@ from scipy.spatial.distance import cdist
 import numpy as np
 import mrich
 from mrich import print
+from pathlib import Path
 
 
 def pair_overlap(molA: Mol, molB: Mol):
@@ -28,22 +29,34 @@ def pair_min_distance(molA: Mol, molB: Mol):
     # raise NotImplementedError
     return np.min(dists)
 
-def load_sigFactory(fdef_file=config.FINGERPRINT_FDEF, max_point_count=config.FINGERPRINT_MAXPOINTCOUNT,
-                    bins=config.FINGERPRINT_BINS):
-    """
-    Load signature factory for pharmacophore fp calculation
+def load_sig_factory(
+    fdef_file, 
+    max_point_count,
+    bins,
+):
 
-    :param fdef_file:
-    :param max_point_count:
-    :param bins:
-    :return:
-    """
-    featFactory = ChemicalFeatures.BuildFeatureFactory(fdef_file)
-    sigFactory = SigFactory(featFactory, maxPointCount=max_point_count)
-    sigFactory.SetBins(bins)
-    sigFactory.Init()
-    sigFactory.GetSigSize()
-    return sigFactory
+    fdef_path = Path(fdef_file)
+
+    if not fdef_path.exists():
+        fdef_path = Path(__file__).parent / fdef_file
+
+    assert fdef_path.exists()
+
+    pass
+#     """
+#     Load signature factory for pharmacophore fp calculation
+
+#     :param fdef_file:
+#     :param max_point_count:
+#     :param bins:
+#     :return:
+#     """
+#     featFactory = ChemicalFeatures.BuildFeatureFactory(fdef_file)
+#     sigFactory = SigFactory(featFactory, maxPointCount=max_point_count)
+#     sigFactory.SetBins(bins)
+#     sigFactory.Init()
+#     sigFactory.GetSigSize()
+#     return sigFactory
 
 def calc_pharm_fp(mol, sigFactory, asStr=True):
     """
