@@ -18,6 +18,7 @@ def pure_merge(
     pairs_df: "pd.DataFrame",
     output_dir: str = "knitwork_output",
     cached_only: bool = False,
+    limit: int = 5,
 ) -> "pd.DataFrame":
     """Generate 'pure' Knitwork merges'"""
 
@@ -34,7 +35,7 @@ def pure_merge(
         n_jobs=CONFIG["KNITWORK_NUM_CONNECTIONS"], backend="multiprocessing"
     )(
         delayed(get_pure_expansions)(
-            smiles, synthon, index=i, cache_dir=cache_dir, cached_only=cached_only
+            smiles, synthon, index=i, cache_dir=cache_dir, cached_only=cached_only, limit=limit,
         )
         for i, (_, smiles, synthon) in enumerate(substructure_pairs)
     )
@@ -93,6 +94,7 @@ def impure_merge(
     pairs_df: "pd.DataFrame",
     output_dir: str = "knitwork_output",
     cached_only: bool = False,
+    limit: int = 5,
 ) -> "pd.DataFrame":
     """Generate 'impure' Knitwork merges'"""
 
@@ -110,7 +112,7 @@ def impure_merge(
         n_jobs=CONFIG["KNITWORK_NUM_CONNECTIONS"], backend="multiprocessing"
     )(
         delayed(get_impure_expansions)(
-            smiles, synthon, index=i, cache_dir=cache_dir, cached_only=cached_only
+            smiles, synthon, index=i, cache_dir=cache_dir, cached_only=cached_only, limit=limit,
         )
         for i, (_, smiles, synthon) in enumerate(substructure_pairs)
     )

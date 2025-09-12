@@ -27,6 +27,7 @@ def pure_merge(
     fragment_dir: str = "fragment_output",
     output_dir: str = "knitwork_output",
     cached_only: bool = False,
+    limit: int = 5,
 ):
     mrich.h1("PURE MERGE")
     from .knit import pure_merge
@@ -42,7 +43,7 @@ def pure_merge(
     mrich.var("pairs_df", pairs_df)
     pairs_df = pd.read_pickle(pairs_df)
 
-    pure_merge(pairs_df=pairs_df, output_dir=output_dir, cached_only=cached_only)
+    pure_merge(pairs_df=pairs_df, output_dir=output_dir, cached_only=cached_only, limit=limit)
 
 
 @app.command()
@@ -50,6 +51,7 @@ def impure_merge(
     fragment_dir: str = "fragment_output",
     output_dir: str = "knitwork_output",
     cached_only: bool = False,
+    limit: int = 5,
 ):
     mrich.h1("IMPURE MERGE")
     from .knit import impure_merge
@@ -65,7 +67,7 @@ def impure_merge(
     mrich.var("pairs_df", pairs_df)
     pairs_df = pd.read_pickle(pairs_df)
 
-    impure_merge(pairs_df=pairs_df, output_dir=output_dir, cached_only=cached_only)
+    impure_merge(pairs_df=pairs_df, output_dir=output_dir, cached_only=cached_only, limit=limit)
 
 
 @app.command()

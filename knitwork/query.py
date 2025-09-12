@@ -235,6 +235,8 @@ def get_impure_expansions(
             return json.load(open(cache_file, "rt"))
         elif cached_only:
             return None
+    
+    mrich.print("Starting impure expansion", index, smiles, synthon)
 
     sig_factory = load_sig_factory(
         fdef_file=CONFIG["FINGERPRINT_FDEF"],
@@ -263,7 +265,7 @@ def get_impure_expansions(
 
     start = time.time()
 
-    mrich.print("Starting query", index, smiles, synthon)
+    # mrich.print("Starting query", index, smiles, synthon)
 
     try:
         records = run_query(query, 
