@@ -236,7 +236,8 @@ def get_impure_expansions(
         elif cached_only:
             return None
     
-    mrich.print("Starting impure expansion", index, smiles, synthon)
+    import logging
+    logging.info("Starting impure expansion", index, smiles, synthon)
 
     sig_factory = load_sig_factory(
         fdef_file=CONFIG["FINGERPRINT_FDEF"],
@@ -294,6 +295,6 @@ def get_impure_expansions(
     if cache_dir:
         json.dump(results, open(cache_file, "wt"), indent=2)
 
-    mrich.success(index, smiles, synthon, "#results:", len(results))
+    logging.info("Success", index, smiles, synthon, "#results:", len(results))
 
     return results

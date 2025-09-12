@@ -107,6 +107,10 @@ def impure_merge(
 
     substructure_pairs = get_unique_substructure_pairs(pairs_df)
 
+    # custom logger
+    import logging, sys
+    logging.basicConfig(stream=sys.stdout, level=logging.INFO, force=True)
+
     # parallel merging
     results = Parallel(
         n_jobs=CONFIG["KNITWORK_NUM_CONNECTIONS"], backend="multiprocessing"
