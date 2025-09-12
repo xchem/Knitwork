@@ -217,6 +217,7 @@ def get_pure_expansions(
 
     return results
 
+
 def get_impure_expansions(
     smiles: str,
     synthon: str,
@@ -275,16 +276,18 @@ def get_impure_expansions(
 
     results = []
     for records in records:
-        results.append((
-            res["smi"], # expansion
-            res["syn"], # synthon
-            res["sim"], # similarity
-            res["ids"], # compound_id
-        ))
-    
+        results.append(
+            (
+                res["smi"],  # expansion
+                res["syn"],  # synthon
+                res["sim"],  # similarity
+                res["ids"],  # compound_id
+            )
+        )
+
     if cache_dir:
         json.dump(results, open(cache_file, "wt"), indent=2)
-    
+
     mrich.success(index, smiles, synthon, "#results:", len(results))
 
     return results

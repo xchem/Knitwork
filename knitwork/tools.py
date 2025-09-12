@@ -1,4 +1,3 @@
-
 import mrich
 from mrich import print
 
@@ -11,6 +10,7 @@ from rdkit.Chem import Mol, rdShapeHelpers
 from rdkit.Chem import ChemicalFeatures
 from rdkit.Chem.Pharm2D import Generate
 from rdkit.Chem.Pharm2D.SigFactory import SigFactory
+
 
 def pair_overlap(molA: Mol, molB: Mol):
     overlapA = 1 - rdShapeHelpers.ShapeProtrudeDist(molA, molB, allowReordering=False)
@@ -34,14 +34,15 @@ def pair_min_distance(molA: Mol, molB: Mol):
     # raise NotImplementedError
     return np.min(dists)
 
+
 def load_sig_factory(
-    fdef_file: str | Path, 
+    fdef_file: str | Path,
     max_point_count: int,
     bins: list[list[int]],
 ):
 
     # Get FDef file path
-    
+
     fdef_path = Path(fdef_file)
 
     if not fdef_path.exists():
@@ -54,13 +55,14 @@ def load_sig_factory(
     feature_factory = ChemicalFeatures.BuildFeatureFactory(fdef_path)
 
     # sig_factory
-    
+
     sig_factory = SigFactory(feature_factory, maxPointCount=max_point_count)
     sig_factory.SetBins(bins)
     sig_factory.Init()
     sig_factory.GetSigSize()
 
     return sig_factory
+
 
 def calc_pharm_fp(mol, sig_factory, as_str=True):
     """
