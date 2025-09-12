@@ -254,13 +254,8 @@ def get_impure_expansions(
     WHERE sim >= $threshold
     AND NOT e.prop_synthon=$query_synthon
     RETURN smi, syn, sim, ids
-    """ % {
-        "vector": vector,  # a pre-computed fp for the query substructure used to calculate similarity
-        "threshold": threshold,  # a threshold for similarity to identify replacement subtructures
-        "metric": metric,  # TODO: not used here: we have manually specified the name of the similarity function
-        "num_hops": num_hops,
-    }
-
+    """
+    
     if limit:
         query = query + f" LIMIT {limit}"
 
@@ -269,7 +264,14 @@ def get_impure_expansions(
     mrich.print("Starting query", index, smiles, synthon)
 
     try:
-        records = run_query(query, smiles=smiles, query_synthon=synthon)
+        records = run_query(query, 
+            smiles=smiles, 
+            query_synthon=synthon,
+            vector=vector,
+            threshold=threshold,
+            metric=metric,
+            num_hops=num_hops,
+        )
     except Exception as e:
         mrich.error(index, e)
         raise Exception(f"{smiles=} {synthon=} {e}")
