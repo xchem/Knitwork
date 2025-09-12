@@ -50,7 +50,7 @@ python -m knitwork fragment --help
 To query the graph database for "pure" merges matching fragment pairs in the `fragment_output` folder by default:
 
 ```
-python -m knitwork pure_merge
+python -m knitwork pure-merge
 ```
 
 This will generate pickled pandas dataframes, along with caches and other outputs in `knitwork_output` by default:
@@ -59,3 +59,14 @@ This will generate pickled pandas dataframes, along with caches and other output
 - `pure_merges.sdf`: SDF of merges
 
 ## Impure Knitting
+
+To query the graph database for "impure" merges matching fragment pairs in the `fragment_output` folder by default:
+
+```
+python -m knitwork impure-merge
+```
+
+This will generate pickled pandas dataframes, along with caches and other outputs in `knitwork_output` by default:
+
+- `impure_merges.pkl.gz`: pickled dataframe of merges
+- `impure_merges.sdf`: SDF of merges
