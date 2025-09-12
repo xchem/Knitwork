@@ -177,7 +177,7 @@ def get_pure_expansions(
 ):
 
     if cache_dir:
-        cache_file = cache_dir / f"{smiles}_{synthon}_{num_hops}_{limit}.json"
+        cache_file = cache_dir / f"pure_{smiles}_{synthon}_{num_hops}_{limit}.json"
         if cache_file.exists():
             mrich.print("Using cache", index, smiles, synthon)
             return json.load(open(cache_file, "rt"))
@@ -229,7 +229,7 @@ def get_impure_expansions(
 ):
 
     if cache_dir:
-        cache_file = cache_dir / f"{smiles}_{synthon}_{num_hops}_{limit}.json"
+        cache_file = cache_dir / f"impure_{smiles}_{synthon}_{num_hops}_{limit}.json"
         if cache_file.exists():
             mrich.print("Using cache", index, smiles, synthon)
             return json.load(open(cache_file, "rt"))
