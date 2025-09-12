@@ -279,13 +279,13 @@ def get_impure_expansions(
         raise Exception(f"{smiles=} {synthon=} {e}")
 
     results = []
-    for records in records:
+    for record in records:
         results.append(
             (
-                res["smi"],  # expansion
-                res["syn"],  # synthon
-                res["sim"],  # similarity
-                res["ids"],  # compound names / IDs
+                record["smi"],  # expansion
+                record["syn"],  # synthon
+                record["sim"],  # similarity
+                record["ids"],  # compound names / IDs
             )
         )
 
