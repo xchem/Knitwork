@@ -35,7 +35,12 @@ def pure_merge(
         n_jobs=CONFIG["KNITWORK_NUM_CONNECTIONS"], backend="multiprocessing"
     )(
         delayed(get_pure_expansions)(
-            smiles, synthon, index=i, cache_dir=cache_dir, cached_only=cached_only, limit=limit,
+            smiles,
+            synthon,
+            index=i,
+            cache_dir=cache_dir,
+            cached_only=cached_only,
+            limit=limit,
         )
         for i, (_, smiles, synthon) in enumerate(substructure_pairs)
     )
@@ -109,6 +114,7 @@ def impure_merge(
 
     # custom logger
     import logging, sys
+
     logging.basicConfig(stream=sys.stdout, level=logging.INFO, force=True)
 
     # parallel merging
@@ -116,7 +122,12 @@ def impure_merge(
         n_jobs=CONFIG["KNITWORK_NUM_CONNECTIONS"], backend="multiprocessing"
     )(
         delayed(get_impure_expansions)(
-            smiles, synthon, index=i, cache_dir=cache_dir, cached_only=cached_only, limit=limit,
+            smiles,
+            synthon,
+            index=i,
+            cache_dir=cache_dir,
+            cached_only=cached_only,
+            limit=limit,
         )
         for i, (_, smiles, synthon) in enumerate(substructure_pairs)
     )

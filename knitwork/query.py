@@ -226,7 +226,7 @@ def get_impure_expansions(
     cache_dir=None,
     cached_only=False,
 ):
-    
+
     if cache_dir:
         cache_file = cache_dir / f"impure_{smiles}_{synthon}_{num_hops}_{limit}.json"
         if cache_file.exists():
@@ -234,7 +234,7 @@ def get_impure_expansions(
             return json.load(open(cache_file, "rt"))
         elif cached_only:
             return None
-    
+
     logging.info(f"Starting impure expansion {index} {smiles} {synthon}")
 
     sig_factory = load_sig_factory(
@@ -256,15 +256,16 @@ def get_impure_expansions(
     AND NOT e.prop_synthon=$query_synthon
     RETURN smi, syn, sim, ids
     """ % {
-        "num_hops":num_hops,
+        "num_hops": num_hops,
     }
 
     if limit:
         query = query + f" LIMIT {limit}"
 
     try:
-        records = run_query(query, 
-            smiles=smiles, 
+        records = run_query(
+            query,
+            smiles=smiles,
             query_synthon=synthon,
             vector=vector,
             threshold=threshold,
