@@ -1,4 +1,5 @@
 import mrich
+import logging
 from mrich import print
 
 import json
@@ -179,7 +180,7 @@ def get_pure_expansions(
     if cache_dir:
         cache_file = cache_dir / f"pure_{smiles}_{synthon}_{num_hops}_{limit}.json"
         if cache_file.exists():
-            mrich.print("Using cache", index, smiles, synthon)
+            logging.info(f"Using cache {index} {smiles} {synthon}")
             return json.load(open(cache_file, "rt"))
         elif cached_only:
             return None
@@ -196,9 +197,7 @@ def get_pure_expansions(
     if limit:
         query = query + f" LIMIT {limit}"
 
-    # start = time.time()
-
-    mrich.print("Starting query", index, smiles, synthon)
+    logging.info(f"Starting impure expansion {index} {smiles} {synthon}")
 
     try:
         records = run_query(query, smiles=smiles, synthon=synthon)
@@ -213,7 +212,7 @@ def get_pure_expansions(
     if cache_dir:
         json.dump(results, open(cache_file, "wt"), indent=2)
 
-    mrich.success(index, smiles, synthon, "#results:", len(results))
+    logging.info(f"Success {index} {smiles} {synthon} #results: {len(results)}")
 
     return results
 
@@ -228,8 +227,6 @@ def get_impure_expansions(
     cached_only=False,
 ):
     
-    import logging
-
     if cache_dir:
         cache_file = cache_dir / f"impure_{smiles}_{synthon}_{num_hops}_{limit}.json"
         if cache_file.exists():
@@ -264,10 +261,6 @@ def get_impure_expansions(
 
     if limit:
         query = query + f" LIMIT {limit}"
-
-    start = time.time()
-
-    # mrich.print("Starting query", index, smiles, synthon)
 
     try:
         records = run_query(query, 
