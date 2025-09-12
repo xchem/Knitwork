@@ -103,7 +103,7 @@ def impure_merge(
 
     output_dir, cache_dir = create_dirs(output_dir)
 
-    substructure_pairs = set(list(get_unique_substructure_pairs(pairs_df))[:1])
+    substructure_pairs = get_unique_substructure_pairs(pairs_df)
 
     # parallel merging
     results = Parallel(
@@ -115,7 +115,56 @@ def impure_merge(
         for i, (_, smiles, synthon) in enumerate(substructure_pairs)
     )
 
-    # raise NotImplementedError
+    if not results:
+        mrich.error("No results")
+        return None
+
+    # process results
+    data = []
+    for ((hit1, hit2), subnode, synthon), result in zip(substructure_pairs, results):
+
+        if result is None:
+            mrich.warning("Skipping", hit1, hit2, subnode, synthon)
+            continue
+
+        for expansion, result_synthon, similarity, ids in result:
+            data.append(
+                dict(
+                    ID_A=hit1,
+                    ID_B=hit2,
+                    subnode_A=subnode,
+                    synthon_B=synthon,
+                    merge_smiles=expansion,
+                    catalogue_names=ids,
+                    similarity=similarity,
+                    result_synthon=result_synthon,
+                )
+            )
+
+    mrich.var("#merges", len(data))
+
+    df = pd.DataFrame(data)
+    df.loc[:, "ROMol"] = df["merge_smiles"].apply(MolFromSmiles)
+
+    # write pickle
+    df_path = output_dir / "impure_merges.pkl.gz"
+    mrich.writing(df_path)
+    df.to_pickle(df_path)
+
+    df.loc[:, "ID"] = df.index
+
+    # write SDF
+    sdf_path = output_dir / "impure_merges.sdf"
+    mrich.writing(sdf_path)
+    PandasTools.WriteSDF(
+        df,
+        str(sdf_path),
+        molColName="ROMol",
+        idName="ID",
+        properties=df.columns,
+    )
+
+    return df
 
 
 def create_dirs(output_dir: str | Path) -> (Path, Path):

@@ -281,7 +281,7 @@ def get_impure_expansions(
                 res["smi"],  # expansion
                 res["syn"],  # synthon
                 res["sim"],  # similarity
-                res["ids"],  # compound_id
+                res["ids"],  # compound names / IDs
             )
         )
 
