@@ -17,6 +17,9 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
+    "MPyTools",
+    "joblib",
+    "pandas",
 ]
 [project.urls]
 "Homepage" = "https://github.com/xchem/FragmentKnitwork"
