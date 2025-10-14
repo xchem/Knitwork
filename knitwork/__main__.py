@@ -11,6 +11,8 @@ def fragment(
     input_sdf: str,
     output_dir: str = "fragment_output",
 ):
+    """Fragment and pair up input molecules so that substructure matching can be run"""
+
     mrich.h1("FRAGMENT")
     from .fragment import fragment
     from rdkit.Chem import PandasTools
@@ -29,6 +31,8 @@ def pure_merge(
     cached_only: bool = False,
     limit: int = 5,
 ):
+    """Enumerate 'pure' knitwork merges"""
+
     mrich.h1("PURE MERGE")
     from .knit import pure_merge
     import pandas as pd
@@ -55,6 +59,8 @@ def impure_merge(
     cached_only: bool = False,
     limit: int = 5,
 ):
+    """Enumerate 'impure' knitwork merges"""
+
     mrich.h1("IMPURE MERGE")
     from .knit import impure_merge
     import pandas as pd
@@ -79,6 +85,7 @@ def configure(
     var: str,
     value: str,
 ):
+    """Set a configuration variable"""
 
     from .config import VARIABLES, CONFIG, dump_config
 
@@ -105,6 +112,31 @@ def configure(
 
     CONFIG[var] = value
     dump_config(CONFIG)
+
+
+@app.command()
+def combine_inputs(
+    inputs: list[str],
+    output: str,
+):
+    """Combine SDF inputs into a single file"""
+
+    mrich.var("#inputs", len(inputs))
+    mrich.var("inputs", inputs)
+    mrich.var("output", output)
+
+    from rdkit import Chem
+
+    mols = []
+    for sdf_file in inputs:
+        suppl = Chem.SDMolSupplier(sdf_file)
+        mols.extend([m for m in suppl if m is not None])
+
+    mrich.writing(output)
+    writer = Chem.SDWriter(output)
+    for mol in mols:
+        writer.write(mol)
+    writer.close()
 
 
 if __name__ == "__main__":
