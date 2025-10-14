@@ -1,16 +1,16 @@
 
-# fail anytime unset variables are used
-set -u
+set -u # fail anytime unset variables are used
+set -e # exit on any failed commands
 
 # configure graph location
-python -m knitwork.configure GRAPH_LOCATION $NEO4J_LOCATION
-python -m knitwork.configure GRAPH_USERNAME $NEO4J_USERNAME
-python -m knitwork.configure GRAPH_PASSWORD $NEO4J_PASSWORD
+python -m knitwork configure GRAPH_LOCATION $NEO4J_LOCATION
+python -m knitwork configure GRAPH_USERNAME $NEO4J_USERNAME
+python -m knitwork configure GRAPH_PASSWORD $NEO4J_PASSWORD
 
 mkdir -p knitwork_input
 
 # combine individual sdfs into a single input
-python -m knitwork combine-inputs *.sdf --output knitwork_input/input.sdf
+python -m knitwork combine-inputs data/*.sdf knitwork_input/input.sdf
 
 # run fragmentation on input.sdf
 python -m knitwork fragment knitwork_input/input.sdf
