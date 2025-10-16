@@ -16,16 +16,23 @@ jobs:
       tag: latest
       project-directory: /app/data
       working-directory: /app
+      environment:
+      - name: NEO4J_USERNAME
+        value-from:
+          secret:
+            name: im-fragnet-graph
+            key: username
+      - name: NEO4J_PASSWORD
+        value-from:
+          secret:
+            name: im-fragnet-graph
+            key: password
+      # The location
+      # Something like 'neo4j://localhost:7687'
+      - name: NEO4J_LOCATION
+        value-from:
+          secret:
+            name: im-fragnet-graph
+            key: server
     command: >-
-      python -m knitwork fragment '{{ inputFile }}'
-    variables:
-      inputs:
-        type: object
-        required:
-        - inputFile
-        properties:
-          inputFile:
-            title: Molecules to process
-            mime-types:
-            - chemical/x-mdl-sdfile
-            type: file
+      run_knitwork.sh
