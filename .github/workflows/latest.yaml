@@ -39,11 +39,11 @@ jobs:
     - name: Initialise workflow variables
       id: vars
       env:
-        DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+        DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
       run: |
-        # Do we push, i.e. is DOCKERHUB_USERNAME defined?
-        echo push=${{ env.DOCKERHUB_USERNAME != '' }}
-        echo "push=${{ env.DOCKERHUB_USERNAME != '' }}" >> $GITHUB_OUTPUT
+        # Do we push, i.e. is DOCKERHUB_TOKEN defined?
+        echo push=${{ env.DOCKERHUB_TOKEN != '' }}
+        echo "push=${{ env.DOCKERHUB_TOKEN != '' }}" >> $GITHUB_OUTPUT
     - name: Set lower case owner name
       run: |
         echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
@@ -58,7 +58,7 @@ jobs:
       if: steps.vars.outputs.push == 'true'
       uses: docker/login-action@v3
       with:
-        username: ${{ secrets.DOCKER_USERNAME }}
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Push
       id: push
