@@ -1,0 +1,66 @@
+---
+
+name: Publish latest image
+
+# ---------------
+# Control secrets
+# ---------------
+#
+# At the GitHub 'organisation' or 'project' level you are expected to
+# have the following GitHub 'Repository Secrets' defined
+# (i.e. via 'Settings -> Secrets'): -
+#
+# DOCKERHUB_USERNAME      optional
+# DOCKERHUB_TOKEN         optional - required if DOCKERHUB_USERNAME
+#
+# -----------
+# Environment (GitHub Environments)
+# -----------
+#
+# (none)
+
+on:
+  push:
+
+jobs:
+  publish:
+    name: Push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+      attestations: write
+      id-token: write
+    steps:
+    - name: Check out the repo
+      uses: actions/checkout@v5
+    - name: Inject slug/short variables
+      uses: rlespinasse/github-slug-action@v5
+    - name: Initialise workflow variables
+      id: vars
+      env:
+        DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      run: |
+        # Do we push, i.e. is DOCKERHUB_TOKEN defined?
+        echo push=${{ env.DOCKERHUB_TOKEN != '' }}
+        echo "push=${{ env.DOCKERHUB_TOKEN != '' }}" >> $GITHUB_OUTPUT
+    - name: Set lower case owner name
+      run: |
+        echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
+      env:
+        OWNER: '${{ github.repository_owner }}'
+    - name: Docker build
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        tags: ${{ env.OWNER_LC }}/knitwork:latest
+    - name: Log in to Docker Hub
+      if: steps.vars.outputs.push == 'true'
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Push
+      id: push
+      if: steps.vars.outputs.push == 'true'
+      run: docker push ${{ env.OWNER_LC }}/knitwork:latest

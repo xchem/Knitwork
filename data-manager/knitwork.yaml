@@ -1,0 +1,31 @@
+---
+kind: DataManagerJobDefinition
+kind-version: '2021.1'
+name: XChem Knitwork Tools
+collection: knitwork
+
+jobs:
+  fragment:
+    name: Fragments molecules in an SDF
+    description: >-
+      The Fragment process looks for subnodes and synthons for a given set of
+      fragments/molecules in an SDF and groups them into pairs.
+    version: '1.0.0'
+    image:
+      name: xchem/knitwork
+      tag: latest
+      project-directory: /app/data
+      working-directory: /app
+    command: >-
+      python -m knitwork fragment '{{ inputFile }}'
+    variables:
+      inputs:
+        type: object
+        required:
+        - inputFile
+        properties:
+          inputFile:
+            title: Molecules to process
+            mime-types:
+            - chemical/x-mdl-sdfile
+            type: file

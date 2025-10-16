@@ -1,5 +1,8 @@
 # Knitwork
-refactor of FragmentKnitwork
+
+[![latest](https://github.com/xchem/knitwork/actions/workflows/latest.yaml/badge.svg)](https://github.com/xchem/knitwork/actions/workflows/latest.yaml)
+
+Refactor of FragmentKnitwork
 
 ## Installation
 
@@ -23,7 +26,7 @@ python -m knitwork configure GRAPH_PASSWORD XXXXX
 
 ## Running Fragment Knitwork
 
-Run the following steps to generate merges from ligands in an SDF. 
+Run the following steps to generate merges from ligands in an SDF.
 
 ## Fragmentation
 
