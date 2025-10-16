@@ -45,7 +45,7 @@ jobs:
     - name: Set lower case repository name
       run: echo "repository=${REPO,,}" >> "$GITHUB_ENV"
       env:
-        REPO: '${{ github.repository }}'
+        REPO: '${{ env.GITHUB_REPOSITORY }}'
     - name: Check out the repo
       uses: actions/checkout@v5
     - name: Docker build
