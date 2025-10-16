@@ -32,6 +32,8 @@ jobs:
       attestations: write
       id-token: write
     steps:
+    - name: Check out the repo
+      uses: actions/checkout@v5
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v5
     - name: Initialise workflow variables
@@ -42,17 +44,16 @@ jobs:
         # Do we push, i.e. is DOCKERHUB_USERNAME defined?
         echo push=${{ env.DOCKERHUB_USERNAME != '' }}
         echo "push=${{ env.DOCKERHUB_USERNAME != '' }}" >> $GITHUB_OUTPUT
-    - name: Set lower case repository name
-      run: echo "repository=${REPO,,}" >> "$GITHUB_ENV"
+    - name: Set lower case owner name
+      run: |
+        echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
       env:
-        REPO: '${{ env.GITHUB_REPOSITORY }}'
-    - name: Check out the repo
-      uses: actions/checkout@v5
+        OWNER: '${{ github.repository_owner }}'
     - name: Docker build
       uses: docker/build-push-action@v6
       with:
         context: .
-        tags: ${{ env.respository }}:latest
+        tags: ${{ env.OWNER_LC }}/knitwork:latest
     - name: Log in to Docker Hub
       if: steps.vars.outputs.push == 'true'
       uses: docker/login-action@v3
@@ -62,4 +63,4 @@ jobs:
     - name: Push
       id: push
       if: steps.vars.outputs.push == 'true'
-      run: docker push ${{ env.respository }}:latest
+      run: docker push ${{ env.OWNER_LC }}/knitwork:latest
