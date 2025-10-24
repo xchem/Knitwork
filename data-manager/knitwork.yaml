@@ -5,7 +5,7 @@ name: XChem Knitwork Tools
 collection: knitwork
 
 jobs:
-  fragment:
+  knitwork:
     name: Fragments molecules in an SDF
     description: >-
       The Fragment process looks for subnodes and synthons for a given set of
