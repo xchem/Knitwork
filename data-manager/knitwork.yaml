@@ -11,6 +11,7 @@ jobs:
       The Fragment process looks for subnodes and synthons for a given set of
       fragments/molecules in an SDF and groups them into pairs.
     version: '1.0.0'
+    category: knitwork
     image:
       name: xchem/knitwork
       tag: latest
