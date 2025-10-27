@@ -36,4 +36,4 @@ jobs:
             name: im-fragnet-graph
             key: server
     command: >-
-      run_knitwork.sh
+      ./run_knitwork.sh
