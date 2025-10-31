@@ -111,8 +111,6 @@ def configure(
 
     t = VARIABLES[var]
 
-    mrich.var(var, value)
-
     if t == bool:
         if value == "False":
             value = False
