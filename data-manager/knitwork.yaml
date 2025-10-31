@@ -17,6 +17,7 @@ jobs:
       tag: latest
       project-directory: /app/data
       working-directory: /app
+      # fix-permissions: true # requires outputs
       environment:
       - name: NEO4J_USERNAME
         value-from:
