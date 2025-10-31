@@ -17,6 +17,7 @@ jobs:
       tag: latest
       project-directory: /app/data
       working-directory: /app
+      fix-permissions: true
       environment:
       - name: NEO4J_USERNAME
         value-from:
@@ -36,4 +37,4 @@ jobs:
             name: im-fragnet-graph
             key: server
     command: >-
-      /bin/bash ./run_knitwork.sh
+      /bin/bash ./run_knitwork.sh {{ DM_INSTANCE_DIRECTORY }}
