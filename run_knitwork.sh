@@ -5,6 +5,8 @@ set -e # exit on any failed commands
 
 CONFIG_PATH="knitwork_input/knitwork_config.json"
 
+whomai
+
 mkdir -pv knitwork_input
 
 # configure graph location
