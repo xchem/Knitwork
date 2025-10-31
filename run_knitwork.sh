@@ -6,9 +6,9 @@ set -e # exit on any failed commands
 echo CMD $0 $@
 echo PWD $(pwd)
 echo LS $(ls -a)
+echo LS DATA $(ls -a data)
 echo LS PARENT $(ls -a ..)
 echo LS HOME $(ls -a $HOME)
-echo LS DATA $(ls -a /app/data)
 
 INSTANCE=$1
 echo INSTANCE $1
