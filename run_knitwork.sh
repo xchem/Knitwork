@@ -3,12 +3,11 @@
 set -u # fail anytime unset variables are used
 set -e # exit on any failed commands
 
-echo $@
+echo CMD $0 $@
+echo PWD $(pwd)
+echo USER $(whoami)
 
 CONFIG_PATH="knitwork_input/knitwork_config.json"
-
-pwd
-whomai
 
 mkdir -pv knitwork_input
 
