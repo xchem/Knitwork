@@ -7,6 +7,11 @@ echo CMD $0 $@
 echo PWD $(pwd)
 echo LS $(ls -la)
 
+INSTANCE=$1
+echo INSTANCE $1
+
+echo LS INSTANCE $(ls -la $INSTANCE)
+
 CONFIG_PATH="knitwork_input/knitwork_config.json"
 
 mkdir -pv knitwork_input
