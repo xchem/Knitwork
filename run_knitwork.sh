@@ -3,17 +3,17 @@
 set -u # fail anytime unset variables are used
 set -e # exit on any failed commands
 
-CONFIG_PATH="knitwork_config.json"
+CONFIG_PATH="knitwork_input/knitwork_config.json"
+
+mkdir -pv knitwork_input
 
 # configure graph location
 python -m knitwork configure GRAPH_LOCATION $NEO4J_LOCATION --config-path=$CONFIG_PATH
 python -m knitwork configure GRAPH_USERNAME $NEO4J_USERNAME --config-path=$CONFIG_PATH
 python -m knitwork configure GRAPH_PASSWORD $NEO4J_PASSWORD --config-path=$CONFIG_PATH
 
-mkdir -p knitwork_input
-
 # combine individual sdfs into a single input
-python -m knitwork combine-inputs data/*.sdf knitwork_input/input.sdf --config-path=$CONFIG_PATH
+python -m knitwork combine-inputs data/*.sdf knitwork_input/input.sdf
 
 # run fragmentation on input.sdf
 python -m knitwork fragment knitwork_input/input.sdf --config-path=$CONFIG_PATH
