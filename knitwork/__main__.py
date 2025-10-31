@@ -10,10 +10,14 @@ app = Typer()
 def fragment(
     input_sdf: str,
     output_dir: str = "fragment_output",
+    config_path: str = None,
 ):
     """Fragment and pair up input molecules so that substructure matching can be run"""
 
     mrich.h1("FRAGMENT")
+    
+    init_config(config_path=config_path)
+
     from .fragment import fragment
     from rdkit.Chem import PandasTools
 
@@ -30,10 +34,14 @@ def pure_merge(
     output_dir: str = "knitwork_output",
     cached_only: bool = False,
     limit: int = 5,
+    config_path: str = None,
 ):
     """Enumerate 'pure' knitwork merges"""
 
     mrich.h1("PURE MERGE")
+
+    init_config(config_path=config_path)
+
     from .knit import pure_merge
     import pandas as pd
 
@@ -58,10 +66,14 @@ def impure_merge(
     output_dir: str = "knitwork_output",
     cached_only: bool = False,
     limit: int = 5,
+    config_path: str = None,
 ):
     """Enumerate 'impure' knitwork merges"""
 
     mrich.h1("IMPURE MERGE")
+    
+    init_config(config_path=config_path)
+    
     from .knit import impure_merge
     import pandas as pd
 
@@ -84,8 +96,11 @@ def impure_merge(
 def configure(
     var: str,
     value: str,
+    config_path: str = None,
 ):
     """Set a configuration variable"""
+    
+    init_config(config_path=config_path)
 
     from .config import VARIABLES, CONFIG, dump_config
 
@@ -138,6 +153,11 @@ def combine_inputs(
         writer.write(mol)
     writer.close()
 
+def init_config(
+    config_path: str | Path | None = None,
+) -> None:
+    from .config import setup_config
+    setup_config(config_path=config_path)
 
 if __name__ == "__main__":
     app()
