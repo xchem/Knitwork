@@ -3,17 +3,19 @@
 set -u # fail anytime unset variables are used
 set -e # exit on any failed commands
 
-echo CMD $0 $@
-echo PWD $(pwd)
-echo LS $(ls -a)
-echo LS DATA $(ls -a data)
-echo LS PARENT $(ls -a ..)
-echo LS HOME $(ls -a $HOME)
-
+DATA_DIR=data
 INSTANCE=$1
-echo INSTANCE $1
+INSTANCE_DIR=$DATA_DIR/$INSTANCE
 
-echo LS INSTANCE $(ls -la $INSTANCE)
+# echo CMD $0 $@
+# echo PWD $(pwd)
+# echo LS $(ls -a)
+# echo LS DATA $(ls -a data)
+# echo LS PARENT $(ls -a ..)
+echo LS INSTANCE_DIR $(ls -a $INSTANCE_DIR)
+
+# echo INSTANCE $1
+# echo LS INSTANCE $(ls -la $INSTANCE)
 
 CONFIG_PATH="knitwork_input/knitwork_config.json"
 
