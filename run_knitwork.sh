@@ -5,7 +5,8 @@ set -e # exit on any failed commands
 
 echo CMD $0 $@
 echo PWD $(pwd)
-echo LS $(ls -la)
+echo LS $(ls -a)
+echo LS PARENT $(ls -a ..)
 
 INSTANCE=$1
 echo INSTANCE $1
