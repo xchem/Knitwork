@@ -7,6 +7,7 @@ echo CMD $0 $@
 echo PWD $(pwd)
 echo LS $(ls -a)
 echo LS PARENT $(ls -a ..)
+echo LS HOME $(ls -a $HOME)
 
 INSTANCE=$1
 echo INSTANCE $1
