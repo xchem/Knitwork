@@ -126,7 +126,7 @@ def configure(
     mrich.var(var, value)
 
     CONFIG[var] = value
-    dump_config(CONFIG)
+    dump_config(CONFIG, config_path=config_path)
 
 
 @app.command()
