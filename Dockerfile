@@ -1,12 +1,17 @@
 
 ## BUILD USING: docker build -t knitwork:latest .
 ## RUN USING: 
-
-# docker run -v $(pwd):/app/data -e NEO4J_LOCATION=$NEO4J_LOCATION -e NEO4J_USERNAME=$NEO4J_USERNAME -e NEO4J_PASSWORD=$NEO4J_PASSWORD knitwork:latest 
+# docker run -v $(pwd):/app/data -e NEO4J_LOCATION=$NEO4J_LOCATION -e NEO4J_USERNAME=user -e NEO4J_PASSWORD=pass knitwork:latest
+## TAG USING:
+# docker tag knitwork:latest maxwinokan/knitwork:latest
+## PUSH USING:
+# docker push maxwinokan/knitwork:latest
 
 FROM python:3.11-slim
 
 WORKDIR /app
+
+RUN chmod -R a+rw /app
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends libxrender1 libxext6 libsm6 libexpat1 \
