@@ -3,7 +3,7 @@ import mrich
 from pathlib import Path
 
 CONFIG = None
-CONFIG_PATH = (Path(__file__).parent.parent / "config.json").resolve()
+DEFAULT_CONFIG_PATH = (Path(__file__).parent.parent / "config.json").resolve()
 
 VARIABLES = {
     "GRAPH_LOCATION": str,
@@ -47,7 +47,7 @@ def load_config(
 ) -> dict:
     """Load configuration from JSON, or use defaults"""
     
-    config_path = config_path or CONFIG_PATH
+    config_path = Path(config_path or DEFAULT_CONFIG_PATH)
 
     if config_path.exists():
         return json.load(open(config_path, "rt"))
@@ -63,7 +63,7 @@ def dump_config(
 ) -> None:
     """Dump configuration as JSON"""
 
-    config_path = config_path or CONFIG_PATH
+    config_path = Path(config_path or DEFAULT_CONFIG_PATH)
     mrich.writing(config_path)
     json.dump(config, open(config_path, "wt"), indent=2)
 
