@@ -5,7 +5,7 @@ set -e # exit on any failed commands
 
 echo CMD $0 $@
 echo PWD $(pwd)
-echo USER $(whoami)
+echo LS $(ls -la)
 
 CONFIG_PATH="knitwork_input/knitwork_config.json"
 
