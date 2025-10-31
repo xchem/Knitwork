@@ -3,7 +3,7 @@
 set -u # fail anytime unset variables are used
 set -e # exit on any failed commands
 
-cd $1
+echo $@
 
 CONFIG_PATH="knitwork_input/knitwork_config.json"
 
