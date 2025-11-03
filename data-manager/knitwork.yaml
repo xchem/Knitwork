@@ -37,7 +37,7 @@ jobs:
             name: im-fragnet-graph
             key: server
     command: >-
-      /bin/bash ./run_knitwork.sh {{ ligands }}
+      /bin/bash ./run_knitwork.sh {{ ligands|join(" ") }}
     variables:
       order:
         inputs:
