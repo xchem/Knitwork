@@ -5,19 +5,8 @@ set -e # exit on any failed commands
 
 # DATA_DIR=data
 
-DIRECTORY=$1
-# INSTANCE_DIR=$DATA_DIR/$INSTANCE
-echo DIRECTORY $DIRECTORY
-
-# echo CMD $0 $@
-# echo PWD $(pwd)
-echo LS $(ls -a)
-echo LS DATA $(ls -a data)
-echo LS PARENT $(ls -a ..)
-# echo LS INSTANCE_DIR $(ls -a $INSTANCE_DIR)
-
-# echo INSTANCE $1
-# echo LS INSTANCE $(ls -la $INSTANCE)
+LIGANDS=$1
+echo LIGANDS $LIGANDS
 
 CONFIG_PATH="knitwork_input/knitwork_config.json"
 
@@ -29,7 +18,7 @@ python -m knitwork configure GRAPH_USERNAME $NEO4J_USERNAME --config-path=$CONFI
 python -m knitwork configure GRAPH_PASSWORD $NEO4J_PASSWORD --config-path=$CONFIG_PATH
 
 # combine individual sdfs into a single input
-python -m knitwork combine-inputs $DIRECTORY/*.mol knitwork_input/input.sdf
+python -m knitwork combine-inputs --root data $LIGANDS knitwork_input/input.sdf
 
 # run fragmentation on input.sdf
 python -m knitwork fragment knitwork_input/input.sdf --config-path=$CONFIG_PATH

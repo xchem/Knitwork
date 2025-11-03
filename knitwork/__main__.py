@@ -131,17 +131,23 @@ def configure(
 def combine_inputs(
     inputs: list[str],
     output: str,
+    root: str = None,
 ):
     """Combine SDF inputs into a single file"""
 
     mrich.var("#inputs", len(inputs))
     mrich.var("inputs", inputs)
     mrich.var("output", output)
+    mrich.var("root", root)
 
     from rdkit import Chem
 
     mols = []
     for sdf_file in inputs:
+
+        if root:
+            sdf_file = Path(root) / sdf_file
+
         suppl = Chem.SDMolSupplier(sdf_file)
         mols.extend([m for m in suppl if m is not None])
 

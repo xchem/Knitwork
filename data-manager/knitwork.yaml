@@ -37,17 +37,20 @@ jobs:
             name: im-fragnet-graph
             key: server
     command: >-
-      /bin/bash ./run_knitwork.sh '{{ directory }}'
-    # {{ DM_INSTANCE_DIRECTORY }}
+      /bin/bash ./run_knitwork.sh {{ fragments }}
     variables:
       order:
         inputs:
-          - directory
+          - ligands
       inputs:
         type: object
         required:
-          - directory
+          - ligands
         properties:
-          directory:
-            title: Directory for I/O
+          ligands:
+            title: Ligands to attempt fragmentation and merge on
+            multiple: true
+            mime-types:
+            - chemical/x-mdl-molfile
+            - chemical/x-mdl-sdfile
             type: file
