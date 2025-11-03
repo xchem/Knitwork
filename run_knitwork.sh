@@ -5,7 +5,7 @@ set -e # exit on any failed commands
 
 # DATA_DIR=data
 
-LIGANDS=$1
+LIGANDS=$@
 echo LIGANDS $LIGANDS
 
 CONFIG_PATH="knitwork_input/knitwork_config.json"
