@@ -37,4 +37,17 @@ jobs:
             name: im-fragnet-graph
             key: server
     command: >-
-      /bin/bash ./run_knitwork.sh {{ DM_INSTANCE_DIRECTORY }}
+      /bin/bash ./run_knitwork.sh '{{ directory }}'
+    # {{ DM_INSTANCE_DIRECTORY }}
+    variables:
+      order:
+        inputs:
+          - directory
+      inputs:
+        type: object
+        required:
+          - directory
+        properties:
+          directory:
+            title: Directory for I/O
+            type: file
