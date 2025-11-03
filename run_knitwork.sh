@@ -13,7 +13,7 @@ CONFIG_PATH="knitwork_input/knitwork_config.json"
 mkdir -pv knitwork_input
 
 # configure graph location
-python -m knitwork configure GRAPH_LOCATION $NEO4J_LOCATION --config-path=$CONFIG_PATH
+python -m knitwork configure GRAPH_LOCATION "bolt://"$NEO4J_LOCATION --config-path=$CONFIG_PATH
 python -m knitwork configure GRAPH_USERNAME $NEO4J_USERNAME --config-path=$CONFIG_PATH
 python -m knitwork configure GRAPH_PASSWORD $NEO4J_PASSWORD --config-path=$CONFIG_PATH
 
