@@ -29,14 +29,14 @@ python -m knitwork fragment knitwork_input/input.sdf --config-path=$CONFIG_PATH
 # - fragment_output/pairs.pkl.gz
 
 # run pure merging
-python -m knitwork pure-merge --config-path=$CONFIG_PATH
+# python -m knitwork pure-merge --config-path=$CONFIG_PATH
 
 # outputs: 
 # - knitwork_output/pure_merges.pkl.gz
 # - knitwork_output/pure_merges.sdf
 
 # run impure merging
-python -m knitwork impure-merge --config-path=$CONFIG_PATH
+# python -m knitwork impure-merge --config-path=$CONFIG_PATH
 
 # outputs: 
 # - knitwork_output/impure_merges.pkl.gz

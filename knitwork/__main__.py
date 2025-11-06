@@ -18,7 +18,7 @@ def fragment(
     
     init_config(config_path=config_path)
 
-    from .fragment import fragment
+    from .fragment import fragment as frag
     from rdkit.Chem import PandasTools
 
     input_sdf = Path(input_sdf)
@@ -42,7 +42,7 @@ def pure_merge(
 
     init_config(config_path=config_path)
 
-    from .knit import pure_merge
+    from .knit import pure_merge as merge
     import pandas as pd
 
     fragment_dir = Path(fragment_dir)
@@ -55,7 +55,7 @@ def pure_merge(
     mrich.var("pairs_df", pairs_df)
     pairs_df = pd.read_pickle(pairs_df)
 
-    pure_merge(
+    merge(
         pairs_df=pairs_df, output_dir=output_dir, cached_only=cached_only, limit=limit
     )
 
@@ -74,7 +74,7 @@ def impure_merge(
     
     init_config(config_path=config_path)
     
-    from .knit import impure_merge
+    from .knit import impure_merge as merge
     import pandas as pd
 
     fragment_dir = Path(fragment_dir)
@@ -87,7 +87,7 @@ def impure_merge(
     mrich.var("pairs_df", pairs_df)
     pairs_df = pd.read_pickle(pairs_df)
 
-    impure_merge(
+    merge(
         pairs_df=pairs_df, output_dir=output_dir, cached_only=cached_only, limit=limit
     )
 
