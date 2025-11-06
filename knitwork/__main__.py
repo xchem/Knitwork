@@ -97,6 +97,7 @@ def configure(
     var: str,
     value: str,
     config_path: str = None,
+    silent: bool = False,
 ):
     """Set a configuration variable"""
     
@@ -121,7 +122,8 @@ def configure(
     elif t != str:
         value = t(value)
 
-    mrich.var(var, value)
+    if not silent:
+        mrich.var(var, value)
 
     CONFIG[var] = value
     dump_config(CONFIG, config_path=config_path)
