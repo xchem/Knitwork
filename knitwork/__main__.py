@@ -25,7 +25,7 @@ def fragment(
     mrich.var("input_sdf", input_sdf)
     mol_df = PandasTools.LoadSDF(str(input_sdf.resolve()))
 
-    fragment(mol_df, output_dir)
+    frag(mol_df, output_dir)
 
 
 @app.command()
