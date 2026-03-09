@@ -1,14 +1,10 @@
 import mrich
-from mrich import print
 
-import time
-import asyncio
 import pandas as pd
-from json import loads
 from pathlib import Path
-from rich.progress import Progress
 from joblib import Parallel, delayed
 from rdkit.Chem import MolFromSmiles, PandasTools
+from dm_job_utilities.dm_log import DmLog
 
 from .config import CONFIG, print_config
 from .query import get_pure_expansions, get_impure_expansions
@@ -31,6 +27,7 @@ def pure_merge(
     substructure_pairs = get_unique_substructure_pairs(pairs_df)
 
     # parallel merging
+    DmLog.emit_event("Running pure parallel merge")
     results = Parallel(
         n_jobs=CONFIG["KNITWORK_NUM_CONNECTIONS"], backend="multiprocessing"
     )(
@@ -47,9 +44,11 @@ def pure_merge(
 
     if not results:
         mrich.error("No results")
+        DmLog.emit_event("No pure results")
         return None
 
     # process results
+    DmLog.emit_event("Processing pure results")
     data = []
     for ((hit1, hit2), subnode, synthon), result in zip(substructure_pairs, results):
 
@@ -71,6 +70,7 @@ def pure_merge(
 
     mrich.var("#merges", len(data))
 
+    DmLog.emit_event("Applying pure merge")
     df = pd.DataFrame(data)
     df.loc[:, "ROMol"] = df["merge_smiles"].apply(MolFromSmiles)
 
@@ -82,6 +82,7 @@ def pure_merge(
     df.loc[:, "ID"] = df.index
 
     # write SDF
+    DmLog.emit_event("Writing pure_merges.sdf")
     sdf_path = output_dir / "pure_merges.sdf"
     mrich.writing(sdf_path)
     PandasTools.WriteSDF(
@@ -118,6 +119,7 @@ def impure_merge(
     logging.basicConfig(stream=sys.stdout, level=logging.INFO, force=True)
 
     # parallel merging
+    DmLog.emit_event("Running impure parallel merge")
     results = Parallel(
         n_jobs=CONFIG["KNITWORK_NUM_CONNECTIONS"], backend="multiprocessing"
     )(
@@ -133,10 +135,12 @@ def impure_merge(
     )
 
     if not results:
-        mrich.error("No results")
+        mrich.error("No impure results")
+        DmLog.emit_event("No impure results")
         return None
 
     # process results
+    DmLog.emit_event("Processing impure results")
     data = []
     for ((hit1, hit2), subnode, synthon), result in zip(substructure_pairs, results):
 
@@ -160,6 +164,7 @@ def impure_merge(
 
     mrich.var("#merges", len(data))
 
+    DmLog.emit_event("Applying impure merge")
     df = pd.DataFrame(data)
     df.loc[:, "ROMol"] = df["merge_smiles"].apply(MolFromSmiles)
 
@@ -171,6 +176,7 @@ def impure_merge(
     df.loc[:, "ID"] = df.index
 
     # write SDF
+    DmLog.emit_event("Writing impure_merges.sdf")
     sdf_path = output_dir / "impure_merges.sdf"
     mrich.writing(sdf_path)
     PandasTools.WriteSDF(

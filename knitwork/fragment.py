@@ -1,11 +1,11 @@
 import mrich
-from mrich import print
 from pathlib import Path
 from .config import CONFIG, print_config
 import asyncio
 from .query import aget_subnodes, aget_synthons, aget_r_groups
 from rich.progress import Progress
 from rdkit import Chem
+from dm_job_utilities.dm_log import DmLog
 
 MOL_CACHE = {}
 MOL_C = None
@@ -50,6 +50,7 @@ def fragment(
     mrich.var("#molecules", n_molecules)
 
     # asynchronous mol tasks
+    DmLog.emit_event("Running asynchronous mol tasks")
     with Progress() as progress:
         smiles_list = mol_df["smiles"].unique()
         n_unique = len(smiles_list)
@@ -60,16 +61,19 @@ def fragment(
         results = asyncio.run(fragment_tasks(smiles_list, progress, (t1, t2, t3)))
 
     # filter results
+    DmLog.emit_event("Filtering smiles lists")
     for smiles, v in results.items():
         v["subnodes"] = filter_smiles_list(v["subnodes"], synthons=False)
         v["synthons"] = filter_smiles_list(v["synthons"], synthons=True)
 
     # update molecule dataframe
+    DmLog.emit_event('Updating molecule dataframe')
     mol_df.loc[:, "subnodes"] = mol_df["smiles"].map(lambda s: results[s]["subnodes"])
     mol_df.loc[:, "synthons"] = mol_df["smiles"].map(lambda s: results[s]["synthons"])
     mol_df.loc[:, "r_groups"] = mol_df["smiles"].map(lambda s: results[s]["r_groups"])
 
     # construct subnodes from synthons
+    DmLog.emit_event("Construct subnodes from synthons")
     for i, row in mol_df.iterrows():
         for synthon in row["synthons"]:
             mol = Chem.MolFromSmiles("[Xe]c1cscn1")
@@ -88,6 +92,7 @@ def fragment(
                 mol_df.loc[i, "subnodes"].append(new_s)
 
     # write mol_df
+    DmLog.emit_event("Writing molecule dataframe")
     mol_df_path = output_dir / "molecules.pkl.gz"
     mrich.writing(mol_df_path)
     mol_df.to_pickle(mol_df_path)
@@ -102,6 +107,7 @@ def fragment(
     )
 
     # get pairs
+    DmLog.emit_event("Getting pairs")
     pair_df = mol_df.copy()
     pair_df["key"] = 1
     pair_df = pair_df.merge(pair_df, on="key", suffixes=["_A", "_B"])
@@ -111,6 +117,7 @@ def fragment(
     mrich.var("#pairs", len(pair_df))
 
     # filter by overlap
+    DmLog.emit_event("Filtering by overlap")
     pair_df["overlap"] = pair_df.apply(
         lambda x: pair_overlap(x["ROMol_A"], x["ROMol_B"]), axis=1
     )
@@ -119,6 +126,7 @@ def fragment(
     pair_df = pair_df[~overlapping]
 
     # filter by distance
+    DmLog.emit_event("Filtering by distance")
     pair_df["distance"] = pair_df.apply(
         lambda x: pair_min_distance(x["ROMol_A"], x["ROMol_B"]), axis=1
     )
@@ -129,6 +137,7 @@ def fragment(
     mrich.var(f"#pairs (post-filter)", len(pair_df), "pairs")
 
     # write pair_df
+    DmLog.emit_event("Writing pair dataframe")
     pair_df_path = output_dir / "pairs.pkl.gz"
     mrich.writing(pair_df_path)
     pair_df.to_pickle(pair_df_path)

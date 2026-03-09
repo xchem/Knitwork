@@ -1,7 +1,7 @@
 import mrich
 from typer import Typer
 from pathlib import Path
-import json
+from dm_job_utilities.dm_log import DmLog
 
 app = Typer()
 
@@ -14,8 +14,10 @@ def fragment(
 ):
     """Fragment and pair up input molecules so that substructure matching can be run"""
 
+    DmLog.emit_event("Starting fragment (command)")
+
     mrich.h1("FRAGMENT")
-    
+
     init_config(config_path=config_path)
 
     from .fragment import fragment as frag
@@ -27,6 +29,8 @@ def fragment(
 
     frag(mol_df, output_dir)
 
+    DmLog.emit_event("Finished fragment (command)")
+
 
 @app.command()
 def pure_merge(
@@ -37,6 +41,8 @@ def pure_merge(
     config_path: str = None,
 ):
     """Enumerate 'pure' knitwork merges"""
+
+    DmLog.emit_event("Starting pure-merge (command)")
 
     mrich.h1("PURE MERGE")
 
@@ -59,6 +65,8 @@ def pure_merge(
         pairs_df=pairs_df, output_dir=output_dir, cached_only=cached_only, limit=limit
     )
 
+    DmLog.emit_event("Finished pure-merge (command)")
+
 
 @app.command()
 def impure_merge(
@@ -70,10 +78,12 @@ def impure_merge(
 ):
     """Enumerate 'impure' knitwork merges"""
 
+    DmLog.emit_event("Starting impure-merge (command)")
+
     mrich.h1("IMPURE MERGE")
-    
+
     init_config(config_path=config_path)
-    
+
     from .knit import impure_merge as merge
     import pandas as pd
 
@@ -91,6 +101,8 @@ def impure_merge(
         pairs_df=pairs_df, output_dir=output_dir, cached_only=cached_only, limit=limit
     )
 
+    DmLog.emit_event("Finished impure-merge (command)")
+
 
 @app.command()
 def configure(
@@ -100,7 +112,7 @@ def configure(
     silent: bool = False,
 ):
     """Set a configuration variable"""
-    
+
     init_config(config_path=config_path)
 
     from .config import VARIABLES, CONFIG, dump_config
@@ -137,6 +149,8 @@ def combine_inputs(
 ):
     """Combine SDF inputs into a single file"""
 
+    DmLog.emit_event(f"Starting combine-inputs (command) #inputs={len(inputs)}")
+
     mrich.var("#inputs", len(inputs))
     mrich.var("inputs", inputs)
     mrich.var("output", output)
@@ -158,6 +172,8 @@ def combine_inputs(
     for mol in mols:
         writer.write(mol)
     writer.close()
+
+    DmLog.emit_event("Finished combine-inputs (command)")
 
 def init_config(
     config_path: str | Path | None = None,
