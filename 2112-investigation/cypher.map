@@ -1,0 +1,19 @@
+"""
+MATCH (a:F2 {smiles: '%(smiles)s'})
+CALL apoc.path.expandConfig(a, {
+  relationshipFilter: '<FRAG',
+  minLevel: 0,
+  maxLevel: %(num_hops)d,
+  uniqueness: 'RELATIONSHIP_GLOBAL'
+}) YIELD path
+WITH last(nodes(path)) AS b
+MATCH (b)<-[e:FRAG]-(c:Mol)
+WHERE e.prop_synthon = '%(synthon)s'
+RETURN c.smiles AS smi, c.cmpd_ids AS ids
+LIMIT %(limit)d
+""" % {
+    "smiles": smiles,
+    "synthon": synthon,
+    "num_hops": num_hops,
+    "limit": limit,
+    }
