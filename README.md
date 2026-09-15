@@ -1,6 +1,7 @@
 # Knitwork
 
 [![latest](https://github.com/xchem/knitwork/actions/workflows/latest.yaml/badge.svg)](https://github.com/xchem/knitwork/actions/workflows/latest.yaml)
+[![release](https://github.com/xchem/knitwork/actions/workflows/release.yaml/badge.svg)](https://github.com/xchem/knitwork/actions/workflows/release.yaml)
 
 Refactor of FragmentKnitwork
 

@@ -21,6 +21,9 @@ name: Publish latest image
 
 on:
   push:
+    # Branches only - tags are handled by the 'release' workflow
+    branches:
+    - '**'
 
 jobs:
   publish:
