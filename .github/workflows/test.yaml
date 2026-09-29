@@ -1,0 +1,32 @@
+---
+name: Test
+
+# -----------
+# Environment (GitHub Environments)
+# -----------
+#
+# (none)
+
+on:
+  push:
+    branches:
+    - '**'
+  pull_request:
+
+jobs:
+  test:
+    name: Test packaging
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - name: Check out the repo
+      uses: actions/checkout@v5
+      with:
+        # The package version is derived from git tags
+        fetch-depth: 0
+        persist-credentials: false
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
+    - name: Run tests
+      run: uv run --only-group dev pytest
