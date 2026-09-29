@@ -3,7 +3,7 @@ requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [project]
-name = "Knitwork"
+name = "xchem-knitwork"
 dynamic = ["version"]
 authors = [
     { name = "Max Winokan", email = "max@winokan.com" },

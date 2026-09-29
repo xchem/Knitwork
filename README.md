@@ -7,10 +7,11 @@ Refactor of FragmentKnitwork
 
 ## Installation
 
-Knitwork is published to [PyPI](https://pypi.org/project/knitwork/):
+Knitwork is published to [PyPI](https://pypi.org/project/xchem-knitwork/) as `xchem-knitwork`
+(the Python package is still imported as `knitwork`):
 
 ```
-pip install knitwork
+pip install xchem-knitwork
 ```
 
 For development, install from a clone of the repository:

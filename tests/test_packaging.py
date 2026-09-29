@@ -45,6 +45,11 @@ def _third_party_imports() -> set[str]:
     return {n for n in names if n not in sys.stdlib_module_names}
 
 
+def test_distribution_name_follows_xchem_style(wheel):
+    # Published to PyPI as 'xchem-knitwork', imported as 'knitwork'
+    assert _wheel_metadata(wheel)["Name"] == "xchem-knitwork"
+
+
 def test_wheel_contains_package_modules(wheel):
     names = wheel.namelist()
     for source in PACKAGE_DIR.glob("*.py"):
