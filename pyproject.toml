@@ -1,10 +1,10 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [project]
 name = "Knitwork"
-version = "0.1.0"
+dynamic = ["version"]
 authors = [
     { name = "Max Winokan", email = "max@winokan.com" },
 ]
@@ -19,22 +19,39 @@ classifiers = [
 ]
 
 dependencies = [
-    "MPyTools",
     "joblib",
-    "pandas",
+    "mrich",
     "neo4j",
+    "numpy",
+    "pandas",
     "rdkit",
-    "IPython",
+    "rich",
     "scipy",
     "typer",
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/xchem/FragmentKnitwork"
-"Bug Tracker" = "https://github.com/xchem/FragmentKnitwork/issues"
+"Homepage" = "https://github.com/xchem/Knitwork"
+"Bug Tracker" = "https://github.com/xchem/Knitwork/issues"
 
-[tool.hatch.build]
-include = [
-    "knitwork/*.py",
-    "run_knitwork.sh",
+[dependency-groups]
+dev = [
+    "build",
+    "packaging",
+    "pytest",
+]
+
+# The package version comes from the repository's git tag (e.g. '1.2.0').
+# Builds without git history (e.g. the Docker image) fall back to '0.0.0'.
+[tool.hatch.version]
+source = "vcs"
+fallback-version = "0.0.0"
+
+[tool.hatch.build.targets.wheel]
+packages = ["knitwork"]
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "2112-investigation",
+    "data",
 ]

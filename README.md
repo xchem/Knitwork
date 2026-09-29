@@ -7,11 +7,36 @@ Refactor of FragmentKnitwork
 
 ## Installation
 
+Knitwork is published to [PyPI](https://pypi.org/project/knitwork/):
+
+```
+pip install knitwork
+```
+
+For development, install from a clone of the repository:
+
 ```
 git clone https://github.com/xchem/Knitwork
 cd Knitwork
 pip install --user -e .
 ```
+
+## Testing
+
+Tests use [uv](https://docs.astral.sh/uv/) and the `dev` dependency group:
+
+```
+uv run --only-group dev pytest
+```
+
+## Releasing
+
+Releases are made by pushing a semantic version tag (with no `v` prefix),
+e.g. `1.2.0` or `1.2.0-rc.1`. The package version is taken from the tag.
+The release workflow then publishes: -
+
+- The Python package to PyPI (using PyPI Trusted Publishing)
+- A Docker image to Docker Hub (as `xchem/knitwork:<tag>`)
 
 ## Configuration
 
